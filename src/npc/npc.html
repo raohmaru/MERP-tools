@@ -1,0 +1,216 @@
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Personajes 🍃 MERP Tools</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+    <header>Generador de Personajes 0.1</header>
+
+    <main id="npcgen">
+        <form action="" @submit.prevent="generate">
+            <fieldset>
+                <Name ref="name"/>
+            </fieldset>
+
+            <fieldset>
+                <label for="npc-gender">Género</label>
+                <select name="gender" id="npc-gender">
+                    <option value="random">Al azar</option>
+                    <option v-for="(value, key) of data.genres"
+                            :value="key">{{ value }}</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <label for="npc-prof">Profesión</label>
+                <select name="profession" id="npc-prof">
+                    <option value="random">Al azar</option>
+                    <option v-for="(value, key) of data.professions"
+                            :value="key">{{ value }}</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <input type="checkbox"
+                       v-model="addJob">
+                <label for="npc-job">Ocupación</label>
+                <select name="job" id="npc-job"
+                        :disabled="!addJob">
+                    <option value="random">Al azar</option>
+                    <option v-for="value in data.jobs">{{ value }}</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <label for="npc-race">Raza</label>
+                <select name="race" id="npc-race" ref="npcRace">
+                    <option value="random">Al azar</option>
+                    <template v-for="(value, key) of data.races">
+                        <option v-if="typeof(value) === 'string'"
+                                :value="key">{{ value }}</option>
+                        <optgroup v-else
+                                  :label="key">
+                            <option v-for="(v, k) of value"
+                                    :value="k">{{ v }}</option>
+                        </optgroup>
+                    </template>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <label for="npc-level-start">Nivel</label>
+                <input type="number" name="level-start" id="npc-level-start" min="1"
+                       v-model="levelStart"
+                       :disabled="randomLevel">
+                a
+                <input type="number" name="level-end" 
+                       v-model="levelEnd"
+                       :min="levelStart"
+                       :disabled="randomLevel">
+                <input type="checkbox" id="npc-level-random"
+                       v-model="randomLevel">
+                <label for="npc-level-random">Aleatorio</label>
+            </fieldset>
+
+            <fieldset>
+                <label for="npc-weapon1">Ataque principal</label>
+                <select name="weapon1" id="npc-weapon1">
+                    <option value="random">Al azar</option>
+                    <option value="pro">Profesional</option>
+                    <template v-for="(value, key) of data.attacks">
+                        <option v-if="typeof(value) === 'string'"
+                                :value="key">{{ value }}</option>
+                        <optgroup v-else
+                                  :label="key">
+                            <option v-for="(gvalue, gkey) in value"
+                                    :value="gkey">{{ gvalue }}</option>
+                        </optgroup>
+                    </template>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <label for="npc-weapon2">Ataque secundario</label>
+                <select name="weapon2" id="npc-weapon2">
+                    <option value="random">Al azar</option>
+                    <option value="pro">Profesional</option>
+                    <template v-for="(value, key) of data.attacks">
+                        <option v-if="typeof(value) === 'string'"
+                                :value="key">{{ value }}</option>
+                        <optgroup v-else
+                                  :label="key">
+                            <option v-for="(gvalue, gkey) in value"
+                                    :value="gkey">{{ gvalue }}</option>
+                        </optgroup>
+                    </template>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <input type="checkbox" name="shield" id="npc-shield">
+                <label for="npc-shield">Escudo</label>
+            </fieldset>
+
+            <fieldset>
+                <label for="npc-variation">Variación</label>
+                <input type="range" name="variation" id="npc-variation" min="0" max="100" step="1"
+                       v-model="variation">
+                <input type="number" min="0" max="100"
+                       v-model="variation">%
+            </fieldset>
+
+            <input type="submit" value="Generar"> <!-- <input type="number" name="qty"> -->
+        </form>
+
+        <article>
+            <table>
+                <caption>{{ npc.name }} (hombre)</caption>
+                <thead>
+                    <tr>
+                        <th>Profesión</th>
+                        <th><abbr title="Nivel">#</abbr></th>
+                        <th><abbr title="Tipo de armadura (Bonificación defensiva)">TA (BD)</abbr></th>
+                        <th><abbr title="Puntos de vida">Pv</abbr></th>
+                        <th><abbr title="Puntos de poder">PP</abbr></th>
+                        <th><abbr title="Bonificación ofensiva con el Arma principal">BO 1ª</abbr></th>
+                        <th><abbr title="Bonificación ofensiva con el Arma secundaria">BO 2ª</abbr></th>
+                        <th><abbr title="Maniobra y movimiento">MM</abbr></th>
+                        <th><abbr title="Habilidades generales">HG</abbr></th>
+                        <th><abbr title="Acechar y esconderse">Acech. Escond.</abbr></th>
+                        <th><abbr title="Abrir cerraduras / Desactivar trampas">Cerrad./Tramp.</abbr></th>
+                        <th><abbr title="Percepción">Per.</abbr></th>
+                        <th><abbr title="Leer runas">Runas</abbr></th>
+                        <th><abbr title="Usar objetos">Usar</abbr></th>
+                        <th><abbr title="Bonificación sortilegios base (cantidad de listas de sortilegios)">Sort. (#)</abbr></th>
+                        <th><span title="Bonificación por habilidad de Oficio relacionada">Oficio</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <section>
+                Rasgos de interpretación
+                <ul>
+                    <li>Personalidad</li>
+                    <li>Motivación</li>
+                    <li>Alineamiento</li>
+                </ul>
+            </section>
+        
+            <section>
+                Conducta
+                <ul>
+                    <li>Alineamiento: +0</li>
+                    <li>Honestidad: +0</li>
+                    <li>Dominante: +0</li>
+                </ul>
+            </section>
+        
+            <section>
+                <!-- https://springhole.net/writing_roleplaying_randomators/basic-character-appearance.htm -->
+                Apariencia física
+                <ul>
+                    <li>Piel</li>
+                    <li>Cabello</li>
+                    <li>Ojos</li>
+                    <li>Altura</li>
+                    <li>Peso</li>
+                    <li>Complexión</li>
+                </ul>
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        &copy; 2020 La Tierra de Mierda
+    </footer>
+
+    <script src="../js/vendor/vue.v3.0.2.global.js"></script>
+    <script src="../../dist/npc/js/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,59 @@
+{
+    "rules": [
+        "double-vowels-to-single-vowel",
+        {
+            "regex": "[aou](?=[^aeiou]+[aeiou]?$)",
+            "repl": {
+                "a": "â",
+                "o": "ô",
+                "u": "û"
+            },
+            "prob": 0.75,
+            "descr": "randomly add a circumflex [a|o|u{C|CC}V?]"
+        }
+    ],
+    "infixes": {
+        "prob": 0.5,
+        "list": [
+            "-buri-",
+            "-ghan-",
+            "-khor-",
+            "-ugi-",
+            "-ura-"
+        ]
+    },
+    "parts": {
+        "2": 15
+    },
+    "list": [
+        "Abhan",
+        "Aghan",
+        "Ari-Ghan",
+        "Ari-Ghin",
+        "Ari-Lam",
+        "Baluk",
+        "Dhor",
+        "Drug",
+        "Ges",
+        "Gor",
+        "Gorgun",
+        "Khan",
+        "Khin",
+        "Lim",
+        "Mam",
+        "Mim",
+        "Mug",
+        "Om",
+        "On-Eda",
+        "On-Eno",
+        "On-Monu",
+        "On-Tomu",
+        "Pon",
+        "Praga",
+        "Pura",
+        "Rhan",
+        "Sador",
+        "Suzush",
+        "Tica"
+    ]
+}

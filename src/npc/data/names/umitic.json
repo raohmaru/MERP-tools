@@ -1,0 +1,51 @@
+{
+    "rules": [
+        "double-vowels-to-single-vowel",
+        {
+            "regex": "[ou](?=[^ou]*$)",
+            "repl": {
+                "o": "ô",
+                "u": "û"
+            },
+            "prob": 0.2,
+            "descr": "add circumflex to last [ou]"
+        },
+        {
+            "regex": "[ou](?=[^ou]*$)",
+            "repl": {
+                "o": "ô",
+                "u": "û"
+            },
+            "prob": 0.2,
+            "descr": "add circumflex to last [ou]"
+        }
+    ],
+    "list": [
+        "Aluenda",
+        "Ancanli",
+        "Bais",
+        "Dumalir",
+        "Hust",
+        "Ikus",
+        "Khazi",
+        "Khi",
+        "Koma",
+        "Mahlic",
+        "Odanal",
+        "Phosir",
+        "Shasir",
+        "Sinuphel",
+        "Tasir",
+        "Tost",
+        "Ucaphel",
+        "Ucas",
+        "Ucin",
+        "Ulaphel",
+        "Ular",
+        "Ulas",
+        "Unkus",
+        "Urai",
+        "lati",
+        "umlati"
+    ]
+}

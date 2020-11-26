@@ -1,0 +1,28 @@
+{
+  "name": "merp-tools",
+  "version": "0.1.0",
+  "description": "Tools for MERP game",
+  "private": true,
+  "scripts": {
+    "dev": "rollup -c rollup.config.js",
+    "build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
+    "watch": "rollup -c rollup.config.js --watch"
+  },
+  "keywords": [
+    "merp",
+    "rpg"
+  ],
+  "author": "raohmaru",
+  "license": "MIT",
+  "dependencies": {
+    "cross-env": "^7.0.2",
+    "rollup": "^2.33.3"
+  },
+  "devDependencies": {
+    "@rollup/plugin-alias": "^3.1.1",
+    "@rollup/plugin-node-resolve": "^10.0.0",
+    "@rollup/plugin-replace": "^2.3.4",
+    "@vue/compiler-sfc": "^3.0.2",
+    "rollup-plugin-vue": "^6.0.0-beta.11"
+  }
+}
