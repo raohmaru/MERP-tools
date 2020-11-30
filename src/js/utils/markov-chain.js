@@ -1,4 +1,4 @@
-import { isVowel, toClusters, rules as rulesPreset } from './lang.js';
+import { isVowel, toClusters, rulesPreset } from './lang.js';
 
 /**
  * Name generator using markov chains.
@@ -25,12 +25,33 @@ function addToChain(chain, key, token) {
 }
 
 /**
+ * Process a rule object, parses the regex and it can inherit from a preset.
+ * @param {Object} rules 
+ * @returns {Array}
+ */
+function processRules(rules) {
+    const arr = [];
+    rules.forEach(o => {
+        if (typeof o === 'string') {
+            o = rulesPreset[o];
+        } else if (o instanceof Array) {
+            o = Object.assign({}, rulesPreset[o[0]], o[1]);
+        }
+        arr.push(Object.assign({}, o, {
+            // Global flag does not add index to match()
+            regex: new RegExp(o.regex, typeof o.repl === 'string' ? 'g' : '')
+        }));
+    });
+    return arr;
+}
+
+/**
  * Construct markov chain from a list of strings.
  * @param {Array} list
  * @returns {Object}
  */
 export default function createChain(set) {
-    const { list, rules, infixes, parts } = set;
+    const { list, rules, infixes, parts, diacritics, gender } = set;
     const chain = { infixes, parts };
     for (let i = 0; i < list.length; i++) {
         const m = list[i].match(/[ \-]/);
@@ -73,19 +94,15 @@ export default function createChain(set) {
     }
     
     if (rules) {
-        const arr = [];
-        rules.forEach(o => {
-            if (typeof o === 'string') {
-                o = rulesPreset[o];
-            } else if (o instanceof Array) {
-                o = Object.assign({}, rulesPreset[o[0]], o[1]);
-            }
-            arr.push(Object.assign({}, o, {
-                // Global flag does not add index to match()
-                regex: new RegExp(o.regex, typeof o.repl === 'string' ? 'g' : '')
-            }));
-        });
-        chain.rules = arr;
+        chain.rules = processRules(rules);
+    }
+    
+    if (diacritics) {
+        chain.diacritics = processRules(diacritics);
+    }
+    
+    if (gender) {
+        chain.gender = processRules(gender);
     }
 
     return chain;

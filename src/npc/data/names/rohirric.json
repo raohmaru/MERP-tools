@@ -1,5 +1,9 @@
 {
-    "rules": [
+    "ref": [
+        "https://eldamo.org/content/language-pages/lang-roh.html",
+        "https://www.fantasynamegenerators.com/lotr-rohirrim-names.php"
+    ],
+    "diacritics": [
         "double-vowels-to-single-vowel",
         "not-silent-final-e",
         {
@@ -15,6 +19,20 @@
             "acute-accent-to-vowel-in-next-to-last-syllable",
             { "prob": 0.2 }
         ]
+    ],
+    "gender": [
+        {
+            "type": "male",
+            "regex": "([aeiou]+)$",
+            "repl": ["$1ld", "$1f", "$1lf"],
+            "prob": 0.2
+        },
+        {
+            "type": "female",
+            "regex": "([aeiou]+)$",
+            "repl": ["$1wyn", "$1gyth", "$1lith"],
+            "prob": 0.2
+        }
     ],
     "list": [
         "Aldburg",

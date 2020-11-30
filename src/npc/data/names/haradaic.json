@@ -1,4 +1,8 @@
 {
+    "ref": [
+        "https://eldamo.org/content/language-pages/lang-eas.html",
+        "https://notionclubarchives.fandom.com/wiki/Haradrim"
+    ],
     "rules": [{
             "regex": "([aeiou])\\1+",
             "repl": "$1$1",
@@ -15,6 +19,26 @@
             "repl": "a’$1",
             "prob": 0.2,
             "descr": "glottal stop after [a]"
+        }
+    ],
+    "gender": [
+        {
+            "type": "male",
+            "regex": "a$",
+            "repl": "",
+            "prob": 0.8
+        },
+        {
+            "type": "female",
+            "regex": "[eiou]$",
+            "repl": "a",
+            "prob": 0.7
+        },
+        {
+            "type": "female",
+            "regex": "([^aeiou]$)",
+            "repl": "$1a",
+            "prob": 0.7
         }
     ],
     "list": [

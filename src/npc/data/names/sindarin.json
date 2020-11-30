@@ -1,4 +1,5 @@
 {
+    "ref": ["https://eldamo.org/content/language-pages/lang-s.html"],
     "rules": [
         {
             "regex": "(?<=[aeou])[nm]$",
@@ -9,6 +10,7 @@
         {
             "regex": "ld",
             "repl": "ll",
+            "prob": 0.3,
             "descr": "voiced stops became spirants after liquids; [{l}{d}] > [{l}{ð}]"
         },
         {
@@ -19,6 +21,7 @@
         {
             "regex": "(?<=[lr])b",
             "repl": "v",
+            "prob": 0.9,
             "descr": "voiced stops became spirants after liquids; [{rl}{b}] > [{rl}{v}]"
         },
         {
@@ -62,7 +65,9 @@
             "repl": "$1i$2",
             "prob": 0.5,
             "descr": "final [i] intruded into preceding syllable"
-        },
+        }
+    ],
+    "diacritics": [
         "double-vowels-to-single-vowel",
         {
             "regex": "(?<=^[^aeiou]+)u$",
@@ -80,6 +85,36 @@
             },
             "prob": 0.5,
             "descr": "sometimes add circumflex to last syllable"
+        }
+    ],
+    "gender": [
+        {
+            "type": "male",
+            "regex": "([aeiou]+[^aeiouh]+)$",
+            "repl": ["on", "ron", "ion", "rion", "ndîr",
+                     "$1on", "$1ron", "$1ion", "$1rion", "$1ndîr"],
+            "prob": 0.3
+        },
+        {
+            "type": "male",
+            "regex": "([^aeiouh]+[aeiou]+)$",
+            "repl": ["on", "ron", "ion", "rion", "ndîr",
+                     "$1ron", "$1rion", "$1ndîr"],
+            "prob": 0.3
+        },
+        {
+            "type": "female",
+            "regex": "([aeiou]+[^aeiouh]+)$",
+            "repl": ["eth", "el", "il", "ril", "ien", "iel", "riel", "rien", "sel", "gwend", "ndîs", "ndess",
+                     "$1eth", "$1el", "$1il", "$1ril", "$1ien", "$1iel", "$1riel", "$1rien", "$1sel", "$1gwend", "$1ndîs", "$1ndess"],
+            "prob": 0.3
+        },
+        {
+            "type": "female",
+            "regex": "([^aeiouh]+[aeiou]+)$",
+            "repl": ["eth", "el", "il", "ril", "ien", "iel", "riel", "rien", "sel", "gwend", "ndîs", "ndess",
+                     "$1ril", "$1riel", "$1rien", "$1sel", "$1gwend", "$1ndîs", "$1ndess"],
+            "prob": 0.3
         }
     ],
     "list": [

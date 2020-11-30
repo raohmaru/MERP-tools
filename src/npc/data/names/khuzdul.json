@@ -1,6 +1,10 @@
 {
-    "rules": [
-        "double-vowels-to-single-vowel",
+    "ref": [
+        "https://eldamo.org/content/language-pages/lang-kh.html",
+        "https://www.forodrim.org/daeron/md_khuzdul.html"
+    ],
+    "diacritics": [
+        "double-vowels-to-long-vowel",
         {
             "regex": "(?<=^[^aeiou]*)[aeiou](?=[^aeiou]+$)",
             "repl": {
@@ -16,6 +20,20 @@
             "add-circumflex-to-vowel-in-next-to-last-syllable",
             { "prob": 0.5 }
         ]
+    ],
+    "gender": [
+        {
+            "type": "male",
+            "regex": "[ai]([^aeiou]?)$",
+            "repl": ["e$1", "o$1", "u$1"],
+            "prob": 0.5
+        },
+        {
+            "type": "female",
+            "regex": "[eou]([^aeiou]?)$",
+            "repl": ["a$1", "i$1"],
+            "prob": 0.5
+        }
     ],
     "list": [
         "Abad",

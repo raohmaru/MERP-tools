@@ -1,4 +1,8 @@
 {
+    "ref": [
+        "https://eldamo.org/content/language-pages/lang-s.html",
+        "http://sindarinlessons.weebly.com/39---gondorian--mirkwood-sindarin.html"
+    ],
     "rules": [
         "short-i-u-became-e-o-preceding-final-a",
         [
@@ -6,7 +10,9 @@
             { "prob": 0.4 }
         ],
         "short-e-o-became-i-u-in-syllable-before-final-i",
-        "double-vowels-to-single-vowel",
+        "double-vowels-to-single-vowel"
+    ],
+    "diacritics": [
         {
             "regex": "(?<=[^aeiou])[iu](?=[^aeiou]+[aeiou]*$)",
             "repl": {
@@ -15,6 +21,36 @@
             },
             "prob": 0.5,
             "descr": "add acute accent to last [i], [u]"
+        }
+    ],
+    "gender": [
+        {
+            "type": "male",
+            "regex": "([aeiou]+[^aeiouh]+)$",
+            "repl": ["on", "ron", "ion", "rion", "ndîr",
+                     "$1on", "$1ron", "$1ion", "$1rion", "$1ndîr"],
+            "prob": 0.3
+        },
+        {
+            "type": "male",
+            "regex": "([^aeiouh]+[aeiou]+)$",
+            "repl": ["on", "ron", "ion", "rion", "ndîr",
+                     "$1ron", "$1rion", "$1ndîr"],
+            "prob": 0.3
+        },
+        {
+            "type": "female",
+            "regex": "([aeiou]+[^aeiouh]+)$",
+            "repl": ["eth", "el", "il", "ril", "ien", "iel", "riel", "rien", "sel", "gwend", "ndîs", "ndess",
+                     "$1eth", "$1el", "$1il", "$1ril", "$1ien", "$1iel", "$1riel", "$1rien", "$1sel", "$1gwend", "$1ndîs", "$1ndess"],
+            "prob": 0.3
+        },
+        {
+            "type": "female",
+            "regex": "([^aeiouh]+[aeiou]+)$",
+            "repl": ["eth", "el", "il", "ril", "ien", "iel", "riel", "rien", "sel", "gwend", "ndîs", "ndess",
+                     "$1ril", "$1riel", "$1rien", "$1sel", "$1gwend", "$1ndîs", "$1ndess"],
+            "prob": 0.3
         }
     ],
     "list": [

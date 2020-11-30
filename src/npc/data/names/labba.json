@@ -1,5 +1,6 @@
 {
-    "rules": [
+    "ref": ["he Northern Waste Middle-earth Realm I.C.E. # 2025 1997"],
+    "diacritics": [
         {
             "regex": "([^a]*)a([^a]*$)",
             "repl": "$1ä$2",

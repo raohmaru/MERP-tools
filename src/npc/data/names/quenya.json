@@ -1,4 +1,5 @@
 {
+    "ref": ["https://eldamo.org/content/language-pages/lang-q.html"],
     "rules": [
         {
             "regex": "ve$",
@@ -9,7 +10,9 @@
             "short-vowels-vanished-before-morpheme-boundaries",
             { "prob": 0.7 }
         ],
-        "double-vowels-to-single-vowel",
+        "double-vowels-to-single-vowel"
+    ],
+    "diacritics": [
         "not-silent-final-e",
         {
             "regex": "\\Be([ao])",
@@ -25,6 +28,32 @@
             "regex": "^ea",
             "repl": "eä",
             "descr": "[ëa] is capitalized to [Eä]"
+        }
+    ],
+    "gender": [
+        {
+            "type": "male",
+            "regex": "([^aeioun])$",
+            "repl": ["$1o", "$1ion", "$1indo", "$1mo", "$1ro"],
+            "prob": 0.3
+        },
+        {
+            "type": "male",
+            "regex": "([aieu]+)$",
+            "repl": ["o", "ion", "indo", "$1mo", "$1ro"],
+            "prob": 0.3
+        },
+        {
+            "type": "female",
+            "regex": "([^aeioul])$",
+            "repl": ["$1e", "$1iel", "$1inde", "$1me", "$1re"],
+            "prob": 0.3
+        },
+        {
+            "type": "female",
+            "regex": "([aiou]+)$",
+            "repl": ["e", "iel", "inde", "$1me", "$1re"],
+            "prob": 0.3
         }
     ],
     "list": [

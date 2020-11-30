@@ -1,4 +1,5 @@
 {
+    "ref": ["https://eldamo.org/content/language-pages/lang-n.html"],
     "rules": [
         "short-i-u-became-e-o-preceding-final-a",
         [
@@ -45,6 +46,32 @@
             "repl": "von",
             "prob": 0.5,
             "descr": "final [vn] sometimes became [von]"
+        }
+    ],
+    "gender": [
+        {
+            "type": "male",
+            "regex": "([^aeioun])$",
+            "repl": ["$1o", "$1ion", "$1indo", "$1mo", "$1ro"],
+            "prob": 0.3
+        },
+        {
+            "type": "male",
+            "regex": "([aieu]+)$",
+            "repl": ["o", "ion", "indo", "$1mo", "$1ro"],
+            "prob": 0.3
+        },
+        {
+            "type": "female",
+            "regex": "([^aeioul])$",
+            "repl": ["$1e", "$1iel", "$1inde", "$1me", "$1re"],
+            "prob": 0.3
+        },
+        {
+            "type": "female",
+            "regex": "([aiou]+)$",
+            "repl": ["e", "iel", "inde", "$1me", "$1re"],
+            "prob": 0.3
         }
     ],
     "list": [

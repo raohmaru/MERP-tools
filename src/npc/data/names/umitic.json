@@ -1,6 +1,7 @@
 {
-    "rules": [
-        "double-vowels-to-single-vowel",
+    "ref": ["https://notionclubarchives.fandom.com/wiki/Umli"],
+    "diacritics": [
+        "double-vowels-to-long-vowel",
         {
             "regex": "[ou](?=[^ou]*$)",
             "repl": {

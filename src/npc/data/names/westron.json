@@ -1,6 +1,24 @@
 {
+    "ref": [
+        "https://eldamo.org/content/language-pages/lang-wes.html",
+        "https://folk.uib.no/hnohf/westron.htm"
+    ],
     "rules": [
         "double-vowels-to-single-vowel"
+    ],
+    "gender": [
+        {
+            "type": "male",
+            "regex": "([^aeiou])[eiou]*$",
+            "repl": "$1a",
+            "prob": 0.2
+        },
+        {
+            "type": "female",
+            "regex": "([^aeiou])[aiu]*$",
+            "repl": ["$1o", "$1e"],
+            "prob": 0.2
+        }
     ],
     "list": [
         "Aduni",

@@ -1,4 +1,9 @@
 {
+    "ref": [
+        "https://notionclubarchives.fandom.com/wiki/Men_of_the_Misty_Mountains",
+        "https://notionclubarchives.fandom.com/wiki/Woodmen_of_Rhovanion",
+        "https://notionclubarchives.fandom.com/wiki/Beornings"
+    ],
     "rules": [
         "double-vowels-to-single-vowel"
     ],

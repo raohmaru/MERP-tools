@@ -1,6 +1,11 @@
 {
-    "rules": [
-        "double-vowels-to-single-vowel",
+    "ref": [
+        "https://eldamo.org/content/language-pages/lang-bs.html",
+        "https://web.archive.org/web/20170503013633/http://midgardsmal.com/category/orkish",
+        "http://blackspeech.ru/"
+    ],
+    "diacritics": [
+        "double-vowels-to-long-vowel",
         [
             "add-circumflex-to-vowel-in-next-to-last-syllable",
             { "prob": 0.3 }

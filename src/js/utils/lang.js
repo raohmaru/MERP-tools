@@ -29,10 +29,20 @@ export function toClusters(str) {
     return arr;
 }
 
-export const rules = {
+export const rulesPreset = {
     "double-vowels-to-single-vowel": {
         "regex": "([aeiou])\\1",
         "repl": "$1"
+    },
+    "double-vowels-to-long-vowel": {
+        "regex": "([aeiou])\\1",
+        "repl": {
+            "a": "â",
+            "e": "ê",
+            "i": "î",
+            "o": "ô",
+            "u": "û"
+        }
     },
     "short-vowels-vanished-before-morpheme-boundaries": {
         "regex": "(\\B[aeiou][^aeiou])[aeiou]([^aeiou][aeiou]\\B)",

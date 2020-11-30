@@ -1,6 +1,10 @@
 {
+    "ref": [
+        "https://notionclubarchives.fandom.com/wiki/Varadia",
+        "https://eldamo.org/content/language-pages/lang-eas.html"
+    ],
     "rules": [
-        "double-vowels-to-single-vowel",
+        "double-vowels-to-long-vowel",
         [
             "add-circumflex-to-vowel-in-next-to-last-syllable",
             { "prob": 0.3 }

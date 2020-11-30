@@ -1,6 +1,12 @@
 {
+    "ref": [
+        "https://notionclubarchives.fandom.com/wiki/Folyavultig",
+        "https://notionclubarchives.fandom.com/wiki/Dorwinionrim"
+    ],
     "rules": [
-        "double-vowels-to-single-vowel",
+        "double-vowels-to-single-vowel"
+    ],
+    "diacritics": [
         {
             "regex": "[ou](?=[^aeiou]*$)",
             "repl": {

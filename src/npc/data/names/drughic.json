@@ -1,6 +1,9 @@
 {
+    "ref": ["https://notionclubarchives.fandom.com/wiki/Dr%C3%BBghic"],
     "rules": [
-        "double-vowels-to-single-vowel",
+        "double-vowels-to-single-vowel"
+    ],
+    "diacritics": [
         {
             "regex": "[aou](?=[^aeiou]+[aeiou]?$)",
             "repl": {

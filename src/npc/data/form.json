@@ -1,7 +1,7 @@
 {
-    "genres": {
-        "man": "Hombre",
-        "woman": "Mujer",
+    "genders": {
+        "male": "Hombre",
+        "female": "Mujer",
         "nd": "Sin definir"
     },
     "professions": {
@@ -71,7 +71,9 @@
         "Lutier",
         "Mago",
         "Malabarista",
+        "Marinero",
         "Médico",
+        "Mercader",
         "Mercenario",
         "Milicia",
         "Monje",
@@ -118,8 +120,8 @@
             "corsair": "Corsario",
             "dorwinadan": "Dorwinadan",
             "dunlending": "Dunlendino",
-            "eriadorian": "Eriadoriano (Campesino)",
-            "gondorian": "Gondoriano (Burgués)",
+            "eriadorian": "Eriadoriano / Campesino",
+            "gondorian": "Gondoriano / Burgués",
             "haradan": "Haradan",
             "woodmen": "Hombre de los bosques",
             "easterling": "Hombre del Este",

@@ -1,6 +1,19 @@
 {
-    "rules": [
-        "double-vowels-to-single-vowel",
+    "ref": ["https://eldamo.org/content/language-pages/lang-ad.html"],
+    "rules": [],
+    "diacritics": [
+        [
+            "double-vowels-to-long-vowel",
+            {
+                "repl": {
+                    "a": "â",
+                    "e": "e",
+                    "i": "î",
+                    "o": "ô",
+                    "u": "û"
+                }
+            }
+        ],
         "not-silent-final-e",
         {
             "regex": "nn",
@@ -23,6 +36,32 @@
             "descr": "add circumflex to last [aiou]"
         }
     ],
+    "gender": [
+        {
+            "type": "male",
+            "regex": "([^krndaeiou]$)",
+            "repl": ["$1or", "$1on", "$1od", "$1ur", "$1un", "$1ud", "$1o", "$1u"],
+            "prob": 0.5
+        },
+        {
+            "type": "male",
+            "regex": "[aei]$",
+            "repl": ["or", "on", "od", "ur", "un", "ud", "o", "u"],
+            "prob": 0.5
+        },
+        {
+            "type": "female",
+            "regex": "([^hlszaeiou]$)",
+            "repl": ["$1ith", "$1eth", "$1il", "$1el", "$1is", "$1es", "$1i", "$1e"],
+            "prob": 0.5
+        },
+        {
+            "type": "female",
+            "regex": "[aou]$",
+            "repl": ["ith", "eth", "il", "el", "is", "es", "i", "e"],
+            "prob": 0.5
+        }
+    ],
     "list": [
         "Abarzayan",
         "Abatta",
@@ -37,7 +76,6 @@
         "Aglahad",
         "Aglarrama",
         "Akallabeth",
-        "Alcarondas",
         "Alkarondas",
         "Aman",
         "Amatthane",
@@ -88,7 +126,6 @@
         "Nilu",
         "Nimir",
         "Nimriye",
-        "Nimruzir",
         "Nimruzir",
         "Nimruzirim",
         "Pharazon",

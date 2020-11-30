@@ -48,6 +48,37 @@ function getToken(chain, key, def = '') {
 }
 
 /**
+ * Apply a rule to transform the given string.
+ * @param {Object} rule
+ * @param {String} str
+ * @returns {String}
+ */
+export function applyRule(rule, str) {
+    const m = str.match(rule.regex);
+    if (m) {
+        if (!rule.prob || Math.random() < rule.prob) {
+            // const oldname = str;
+            if (typeof rule.repl === 'string') {
+                str = str.replace(rule.regex, rule.repl);            
+            } else {
+                let repl;
+                if (Array.isArray(rule.repl)) {
+                    repl = sample(rule.repl);
+                } else {
+                    repl = rule.repl[m[0]] || rule.repl[m[1]];
+                }
+                repl = repl.replace('$1', m[1] || '');
+                str = str.substring(0, m.index)
+                       + repl
+                       + str.substring(m.index + m[0].length);
+            }
+            // console.log(`-- ${oldname} --> ${str}`);
+        }
+    }
+    return str;
+}
+
+/**
  * Normalizes a string according to the phonetic rules found in the specimen.
  * @param {String} str
  * @param {Object} chain 
@@ -87,21 +118,8 @@ function normalize(str, chain) {
 
     // Language rules
     if (chain.rules) {
-        chain.rules.forEach(r => {
-            const m = name.match(r.regex);
-            if (m) {
-                if (!r.prob || Math.random() < r.prob) {
-                    // const oldname = name;
-                    if (typeof r.repl === 'string') {
-                        name = name.replace(r.regex, r.repl);
-                    } else {
-                        name = name.substring(0, m.index)
-                               + r.repl[m[0]]
-                               + name.substring(m.index + m[0].length);
-                    }
-                    // console.log(`-- ${oldname} --> ${name}`);
-                }
-            }
+        chain.rules.forEach(rule => {
+            name = applyRule(rule, name);
         });
     }
 
@@ -113,7 +131,7 @@ function normalize(str, chain) {
  * @param {Object} chain 
  * @returns {String}
  */
-export default function createString(chain) {
+export function createString(chain) {
     const parts = getToken(chain, 'parts');
     const names = [];
     let sep = getToken(chain, 'sep', ' ');

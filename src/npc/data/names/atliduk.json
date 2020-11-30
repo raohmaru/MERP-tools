@@ -1,4 +1,5 @@
 {
+    "ref": ["https://es.scribd.com/document/486364949/Atliduk-Language-Guide-and-Lexicon"],
     "rules": [
         "double-vowels-to-single-vowel"
     ],

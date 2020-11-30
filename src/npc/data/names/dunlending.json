@@ -1,12 +1,16 @@
 {
+    "ref": [
+        "https://eldamo.org/content/language-pages/lang-dun.html",
+        "https://iranonofarda.wordpress.com/2011/10/27/dunlending-lexicon/"
+    ],
     "rules": [
         "double-vowels-to-single-vowel"
     ],
     "list": [
-        "Forgoil",
         "Agar",
         "Buldar",
         "Elmar",
+        "Forgoil",
         "Go-hilleg",
         "Gorbelegod",
         "Hazad",
