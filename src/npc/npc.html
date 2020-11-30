@@ -17,57 +17,36 @@
             </fieldset>
 
             <fieldset>
-                <label for="npc-gender">Género</label>
-                <select name="gender" id="npc-gender">
-                    <option value="random">Al azar</option>
-                    <option v-for="(value, key) of data.genres"
-                            :value="key">{{ value }}</option>
-                </select>
+                <Combobox ref="gender" id="gender" title="Género"
+                          :data="data.genders"
+                          v-model="gender"/>
             </fieldset>
-
+            
             <fieldset>
-                <label for="npc-prof">Profesión</label>
-                <select name="profession" id="npc-prof">
-                    <option value="random">Al azar</option>
-                    <option v-for="(value, key) of data.professions"
-                            :value="key">{{ value }}</option>
-                </select>
+                <Combobox ref="prof" id="prof" title="Profesión"
+                          :data="data.professions"
+                          v-model="prof"/>
             </fieldset>
-
+            
             <fieldset>
-                <input type="checkbox"
-                       v-model="addJob">
-                <label for="npc-job">Ocupación</label>
-                <select name="job" id="npc-job"
-                        :disabled="!addJob">
-                    <option value="random">Al azar</option>
-                    <option v-for="value in data.jobs">{{ value }}</option>
-                </select>
+                <Combobox ref="job" id="job" title="Ocupación" :enable="true"
+                          :data="data.jobs"
+                          v-model="job"/>
             </fieldset>
-
+            
             <fieldset>
-                <label for="npc-race">Raza</label>
-                <select name="race" id="npc-race" ref="npcRace">
-                    <option value="random">Al azar</option>
-                    <template v-for="(value, key) of data.races">
-                        <option v-if="typeof(value) === 'string'"
-                                :value="key">{{ value }}</option>
-                        <optgroup v-else
-                                  :label="key">
-                            <option v-for="(v, k) of value"
-                                    :value="k">{{ v }}</option>
-                        </optgroup>
-                    </template>
-                </select>
+                <Combobox ref="race" id="race" title="Raza"
+                          :data="data.races"
+                          v-model="race"/>
             </fieldset>
 
             <fieldset>
                 <label for="npc-level-start">Nivel</label>
-                <input type="number" name="level-start" id="npc-level-start" min="1"
+                <input type="number" name="level-start" id="npc-level-start" min="1" max="50"
                        v-model="levelStart"
                        :disabled="randomLevel">
                 a
-                <input type="number" name="level-end" 
+                <input type="number" name="level-end" max="50"
                        v-model="levelEnd"
                        :min="levelStart"
                        :disabled="randomLevel">
@@ -75,39 +54,17 @@
                        v-model="randomLevel">
                 <label for="npc-level-random">Aleatorio</label>
             </fieldset>
-
+            
             <fieldset>
-                <label for="npc-weapon1">Ataque principal</label>
-                <select name="weapon1" id="npc-weapon1">
-                    <option value="random">Al azar</option>
-                    <option value="pro">Profesional</option>
-                    <template v-for="(value, key) of data.attacks">
-                        <option v-if="typeof(value) === 'string'"
-                                :value="key">{{ value }}</option>
-                        <optgroup v-else
-                                  :label="key">
-                            <option v-for="(gvalue, gkey) in value"
-                                    :value="gkey">{{ gvalue }}</option>
-                        </optgroup>
-                    </template>
-                </select>
+                <Combobox ref="atk1" id="atk1" title="Ataque principal"
+                          :data="data.attacks"
+                          v-model="atk1"/>
             </fieldset>
-
+            
             <fieldset>
-                <label for="npc-weapon2">Ataque secundario</label>
-                <select name="weapon2" id="npc-weapon2">
-                    <option value="random">Al azar</option>
-                    <option value="pro">Profesional</option>
-                    <template v-for="(value, key) of data.attacks">
-                        <option v-if="typeof(value) === 'string'"
-                                :value="key">{{ value }}</option>
-                        <optgroup v-else
-                                  :label="key">
-                            <option v-for="(gvalue, gkey) in value"
-                                    :value="gkey">{{ gvalue }}</option>
-                        </optgroup>
-                    </template>
-                </select>
+                <Combobox ref="atk2" id="atk2" title="Ataque secundario"
+                          :data="data.attacks"
+                          v-model="atk2"/>
             </fieldset>
 
             <fieldset>
@@ -128,7 +85,9 @@
 
         <article>
             <table>
-                <caption>{{ npc.name }} (hombre)</caption>
+                <caption>
+                    {{ npc.name }} ({{ npc.race.label }}<span v-if="npc.gender.id !== 'nd'">, {{ npc.gender.label }}</span>)
+                </caption>
                 <thead>
                     <tr>
                         <th>Profesión</th>
@@ -151,13 +110,16 @@
                 </thead>
                 <tbody>
                     <tr>
+                        <td>
+                            {{ npc.prof.label }}
+                            <span v-if="npc.job.label">/ {{ npc.job.label }}</span>
+                        </td>
                         <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td><abbr :title="npc.atk1.label">{{ npc.atk1.id }}</abbr></td>
+                        <td><abbr :title="npc.atk2.label">{{ npc.atk2.id }}</abbr></td>
                         <td></td>
                         <td></td>
                         <td></td>

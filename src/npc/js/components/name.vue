@@ -1,12 +1,11 @@
 <template>
-    <div>
-        <label for="npc-name">Nombre</label>
-        <input type="text" name="name" id="npc-name"
-                :disabled="randomName">
-        <input type="checkbox" id="npc-name-random"
-                v-model="randomName">
-        <label for="npc-name-random">Aleatorio</label>
-    </div>
+    <label for="npc-name">Nombre</label>
+    <input type="text" name="name" id="npc-name"
+            v-model="name"
+            :disabled="random">
+    <input type="checkbox" id="npc-name-random"
+            v-model="random">
+    <label for="npc-name-random">Aleatorio</label>
 </template>
 
 <script>
@@ -48,30 +47,31 @@ const defaultLang = 'westron';
 export default {
     data() {
         return {
-            randomName: false
+            name: '',
+            random: true
         }
     },
 
     methods: {
-        async getName(nameSet) {
-            let data;
-            if (nameSet === 'random') {
-                nameSet = defaultLang;
-            } else if (raceLangs[nameSet]) {
-                nameSet = raceLangs[nameSet];
+        async getName(race, gender) {
+            if (!this.random) {
+                return this.name;
             }
-            if (nameSetCache[nameSet]) {
-                data = nameSetCache[nameSet];
+
+            const lang = raceLangs[race] || defaultLang;
+            let data;
+            if (nameSetCache[lang]) {
+                data = nameSetCache[lang];
             } else {
-                let res = await fetch(`data/names/${nameSet}.json`);
+                let res = await fetch(`data/names/${lang}.json`);
                 if (!res.ok) {
                     return '';
                 }
                 res = await res.json();
                 data = res;
-                nameSetCache[nameSet] = data;
+                nameSetCache[lang] = data;
             }
-            return generateName(nameSet, data);
+            return generateName(data, lang, gender);
         }
     }
 };
