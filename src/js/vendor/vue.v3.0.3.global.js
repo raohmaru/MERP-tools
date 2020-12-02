@@ -986,19 +986,27 @@ var Vue = (function (exports) {
       }
       return createReactiveObject(target, false, mutableHandlers, mutableCollectionHandlers);
   }
-  // Return a reactive-copy of the original object, where only the root level
-  // properties are reactive, and does NOT unwrap refs nor recursively convert
-  // returned properties.
+  /**
+   * Return a shallowly-reactive copy of the original object, where only the root
+   * level properties are reactive. It also does not auto-unwrap refs (even at the
+   * root level).
+   */
   function shallowReactive(target) {
       return createReactiveObject(target, false, shallowReactiveHandlers, shallowCollectionHandlers);
   }
+  /**
+   * Creates a readonly copy of the original object. Note the returned copy is not
+   * made reactive, but `readonly` can be called on an already reactive object.
+   */
   function readonly(target) {
       return createReactiveObject(target, true, readonlyHandlers, readonlyCollectionHandlers);
   }
-  // Return a reactive-copy of the original object, where only the root level
-  // properties are readonly, and does NOT unwrap refs nor recursively convert
-  // returned properties.
-  // This is used for creating the props proxy object for stateful components.
+  /**
+   * Returns a reactive-copy of the original object, where only the root level
+   * properties are readonly, and does NOT unwrap refs nor recursively convert
+   * returned properties.
+   * This is used for creating the props proxy object for stateful components.
+   */
   function shallowReadonly(target) {
       return createReactiveObject(target, true, shallowReadonlyHandlers, readonlyCollectionHandlers);
   }
@@ -1460,7 +1468,7 @@ var Vue = (function (exports) {
   function invalidateJob(job) {
       const i = queue.indexOf(job);
       if (i > -1) {
-          queue[i] = null;
+          queue.splice(i, 1);
       }
   }
   function queueCb(cb, activeQueue, pendingQueue, index) {
@@ -1544,8 +1552,6 @@ var Vue = (function (exports) {
       //    priority number)
       // 2. If a component is unmounted during a parent component's update,
       //    its update can be skipped.
-      // Jobs can never be null before flush starts, since they are only invalidated
-      // during execution of another flushed job.
       queue.sort((a, b) => getId(a) - getId(b));
       try {
           for (flushIndex = 0; flushIndex < queue.length; flushIndex++) {
@@ -1617,28 +1623,39 @@ var Vue = (function (exports) {
       const id = instance.type.__hmrId;
       let record = map.get(id);
       if (!record) {
-          createRecord(id);
+          createRecord(id, instance.type);
           record = map.get(id);
       }
-      record.add(instance);
+      record.instances.add(instance);
   }
   function unregisterHMR(instance) {
-      map.get(instance.type.__hmrId).delete(instance);
+      map.get(instance.type.__hmrId).instances.delete(instance);
   }
-  function createRecord(id) {
+  function createRecord(id, component) {
+      if (!component) {
+          warn(`HMR API usage is out of date.\n` +
+              `Please upgrade vue-loader/vite/rollup-plugin-vue or other relevant ` +
+              `depdendency that handles Vue SFC compilation.`);
+          component = {};
+      }
       if (map.has(id)) {
           return false;
       }
-      map.set(id, new Set());
+      map.set(id, {
+          component: isClassComponent(component) ? component.__vccOpts : component,
+          instances: new Set()
+      });
       return true;
   }
   function rerender(id, newRender) {
       const record = map.get(id);
       if (!record)
           return;
+      if (newRender)
+          record.component.render = newRender;
       // Array.from creates a snapshot which avoids the set being mutated during
       // updates
-      Array.from(record).forEach(instance => {
+      Array.from(record.instances).forEach(instance => {
           if (newRender) {
               instance.render = newRender;
           }
@@ -1655,25 +1672,25 @@ var Vue = (function (exports) {
           return;
       // Array.from creates a snapshot which avoids the set being mutated during
       // updates
-      Array.from(record).forEach(instance => {
-          const comp = instance.type;
-          if (!hmrDirtyComponents.has(comp)) {
-              // 1. Update existing comp definition to match new one
-              newComp = isClassComponent(newComp) ? newComp.__vccOpts : newComp;
-              extend(comp, newComp);
-              for (const key in comp) {
-                  if (!(key in newComp)) {
-                      delete comp[key];
-                  }
+      const { component, instances } = record;
+      if (!hmrDirtyComponents.has(component)) {
+          // 1. Update existing comp definition to match new one
+          newComp = isClassComponent(newComp) ? newComp.__vccOpts : newComp;
+          extend(component, newComp);
+          for (const key in component) {
+              if (!(key in newComp)) {
+                  delete component[key];
               }
-              // 2. Mark component dirty. This forces the renderer to replace the component
-              // on patch.
-              hmrDirtyComponents.add(comp);
-              // 3. Make sure to unmark the component after the reload.
-              queuePostFlushCb(() => {
-                  hmrDirtyComponents.delete(comp);
-              });
           }
+          // 2. Mark component dirty. This forces the renderer to replace the component
+          // on patch.
+          hmrDirtyComponents.add(component);
+          // 3. Make sure to unmark the component after the reload.
+          queuePostFlushCb(() => {
+              hmrDirtyComponents.delete(component);
+          });
+      }
+      Array.from(instances).forEach(instance => {
           if (instance.parent) {
               // 4. Force the parent instance to re-render. This will cause all updated
               // components to be unmounted and re-mounted. Queue the update so that we
@@ -2080,7 +2097,7 @@ var Vue = (function (exports) {
       if (nextVNode.dirs || nextVNode.transition) {
           return true;
       }
-      if (optimized && patchFlag > 0) {
+      if (optimized && patchFlag >= 0) {
           if (patchFlag & 1024 /* DYNAMIC_SLOTS */) {
               // slot content that references values that might have changed,
               // e.g. in a v-for
@@ -4568,7 +4585,7 @@ var Vue = (function (exports) {
       }
       else {
           if (vnode.shapeFlag & 4 /* STATEFUL_COMPONENT */) {
-              value = vnode.component.proxy;
+              value = vnode.component.exposed || vnode.component.proxy;
           }
           else {
               value = vnode.el;
@@ -6619,7 +6636,9 @@ var Vue = (function (exports) {
       // assets
       components, directives, 
       // lifecycle
-      beforeMount, mounted, beforeUpdate, updated, activated, deactivated, beforeDestroy, beforeUnmount, destroyed, unmounted, render, renderTracked, renderTriggered, errorCaptured } = options;
+      beforeMount, mounted, beforeUpdate, updated, activated, deactivated, beforeDestroy, beforeUnmount, destroyed, unmounted, render, renderTracked, renderTriggered, errorCaptured, 
+      // public API
+      expose } = options;
       const publicThis = instance.proxy;
       const ctx = instance.ctx;
       const globalMixins = instance.appContext.mixins;
@@ -6834,6 +6853,22 @@ var Vue = (function (exports) {
       }
       if (unmounted) {
           onUnmounted(unmounted.bind(publicThis));
+      }
+      if (isArray(expose)) {
+          if (!asMixin) {
+              if (expose.length) {
+                  const exposed = instance.exposed || (instance.exposed = proxyRefs({}));
+                  expose.forEach(key => {
+                      exposed[key] = toRef(publicThis, key);
+                  });
+              }
+              else if (!instance.exposed) {
+                  instance.exposed = EMPTY_OBJ;
+              }
+          }
+          else {
+              warn(`The \`expose\` option is ignored when used in mixins.`);
+          }
       }
   }
   function callSyncHook(name, type, options, instance, globalMixins) {
@@ -7242,6 +7277,7 @@ var Vue = (function (exports) {
           update: null,
           render: null,
           proxy: null,
+          exposed: null,
           withProxy: null,
           effects: null,
           provides: parent ? parent.provides : Object.create(appContext.provides),
@@ -7385,7 +7421,9 @@ var Vue = (function (exports) {
   function handleSetupResult(instance, setupResult, isSSR) {
       if (isFunction(setupResult)) {
           // setup returned an inline render function
-          instance.render = setupResult;
+          {
+              instance.render = setupResult;
+          }
       }
       else if (isObject(setupResult)) {
           if ( isVNode(setupResult)) {
@@ -7477,10 +7515,19 @@ var Vue = (function (exports) {
       }
   };
   function createSetupContext(instance) {
+      const expose = exposed => {
+          if ( instance.exposed) {
+              warn(`expose() should be called only once per setup().`);
+          }
+          instance.exposed = proxyRefs(exposed);
+      };
       {
           // We use getters in dev in case libs like test-utils overwrite instance
           // properties (overwrites should not be done in prod)
           return Object.freeze({
+              get props() {
+                  return instance.props;
+              },
               get attrs() {
                   return new Proxy(instance.attrs, attrHandlers);
               },
@@ -7489,7 +7536,8 @@ var Vue = (function (exports) {
               },
               get emit() {
                   return (event, ...args) => instance.emit(event, ...args);
-              }
+              },
+              expose
           });
       }
   }
@@ -7666,6 +7714,28 @@ var Vue = (function (exports) {
   }
   function createInnerComp(comp, { vnode: { props, children } }) {
       return createVNode(comp, props, children);
+  }
+
+  // implementation
+  function defineProps(props) {
+      if ( props) {
+          warn(`defineProps() is a compiler-hint helper that is only usable inside ` +
+              `<script setup> of a single file component. Its arguments should be ` +
+              `compiled away and passing it at runtime has no effect.`);
+      }
+      return null;
+  }
+  // implementation
+  function defineEmit(emitOptions) {
+      if ( emitOptions) {
+          warn(`defineEmit() is a compiler-hint helper that is only usable inside ` +
+              `<script setup> of a single file component. Its arguments should be ` +
+              `compiled away and passing it at runtime has no effect.`);
+      }
+      return null;
+  }
+  function useContext() {
+      return getCurrentInstance().setupContext;
   }
 
   // Actual implementation
@@ -7967,7 +8037,7 @@ var Vue = (function (exports) {
   }
 
   // Core API ------------------------------------------------------------------
-  const version = "3.0.2";
+  const version = "3.0.3";
   /**
    * SSR utils for \@vue/server-renderer. Only exposed in cjs builds.
    * @internal
@@ -8367,7 +8437,11 @@ var Vue = (function (exports) {
       }
   }
 
-  function useCssVars(getter, scoped = false) {
+  /**
+   * Runtime helper for SFC's CSS variable injection feature.
+   * @private
+   */
+  function useCssVars(getter) {
       const instance = getCurrentInstance();
       /* istanbul ignore next */
       if (!instance) {
@@ -8375,20 +8449,17 @@ var Vue = (function (exports) {
               warn(`useCssVars is called without current active component instance.`);
           return;
       }
-      const prefix = scoped && instance.type.__scopeId
-          ? `${instance.type.__scopeId.replace(/^data-v-/, '')}-`
-          : ``;
-      const setVars = () => setVarsOnVNode(instance.subTree, getter(instance.proxy), prefix);
-      onMounted(() => watchEffect(setVars));
+      const setVars = () => setVarsOnVNode(instance.subTree, getter(instance.proxy));
+      onMounted(() => watchEffect(setVars, { flush: 'post' }));
       onUpdated(setVars);
   }
-  function setVarsOnVNode(vnode, vars, prefix) {
+  function setVarsOnVNode(vnode, vars) {
       if ( vnode.shapeFlag & 128 /* SUSPENSE */) {
           const suspense = vnode.suspense;
           vnode = suspense.activeBranch;
           if (suspense.pendingBranch && !suspense.isHydrating) {
               suspense.effects.push(() => {
-                  setVarsOnVNode(suspense.activeBranch, vars, prefix);
+                  setVarsOnVNode(suspense.activeBranch, vars);
               });
           }
       }
@@ -8399,11 +8470,11 @@ var Vue = (function (exports) {
       if (vnode.shapeFlag & 1 /* ELEMENT */ && vnode.el) {
           const style = vnode.el.style;
           for (const key in vars) {
-              style.setProperty(`--${prefix}${key}`, unref(vars[key]));
+              style.setProperty(`--${key}`, vars[key]);
           }
       }
       else if (vnode.type === Fragment) {
-          vnode.children.forEach(c => setVarsOnVNode(c, vars, prefix));
+          vnode.children.forEach(c => setVarsOnVNode(c, vars));
       }
   }
 
@@ -9204,8 +9275,10 @@ var Vue = (function (exports) {
       target.__VUE__ = true;
       setDevtoolsHook(target.__VUE_DEVTOOLS_GLOBAL_HOOK__);
       {
-          console.info(`You are running a development build of Vue.\n` +
-              `Make sure to use the production build (*.prod.js) when deploying for production.`);
+          {
+              console.info(`You are running a development build of Vue.\n` +
+                  `Make sure to use the production build (*.prod.js) when deploying for production.`);
+          }
           initCustomFormatter();
       }
   }
@@ -9309,6 +9382,8 @@ var Vue = (function (exports) {
   const POP_SCOPE_ID = Symbol( `popScopeId` );
   const WITH_SCOPE_ID = Symbol( `withScopeId` );
   const WITH_CTX = Symbol( `withCtx` );
+  const UNREF = Symbol( `unref` );
+  const IS_REF = Symbol( `isRef` );
   // Name mapping for runtime helpers that need to be imported from 'vue' in
   // generated code. Make sure these are correctly exported in the runtime!
   // Using `any` here because TS doesn't allow symbols as index type.
@@ -9341,7 +9416,9 @@ var Vue = (function (exports) {
       [PUSH_SCOPE_ID]: `pushScopeId`,
       [POP_SCOPE_ID]: `popScopeId`,
       [WITH_SCOPE_ID]: `withScopeId`,
-      [WITH_CTX]: `withCtx`
+      [WITH_CTX]: `withCtx`,
+      [UNREF]: `unref`,
+      [IS_REF]: `isRef`
   };
   function registerRuntimeHelpers(helpers) {
       Object.getOwnPropertySymbols(helpers).forEach(s => {
@@ -9421,13 +9498,13 @@ var Vue = (function (exports) {
           value
       };
   }
-  function createSimpleExpression(content, isStatic, loc = locStub, isConstant = false) {
+  function createSimpleExpression(content, isStatic, loc = locStub, constType = 0 /* NOT_CONSTANT */) {
       return {
           type: 4 /* SIMPLE_EXPRESSION */,
           loc,
-          isConstant,
           content,
-          isStatic
+          isStatic,
+          constType: isStatic ? 3 /* CAN_STRINGIFY */ : constType
       };
   }
   function createCompoundExpression(children, loc = locStub) {
@@ -10110,7 +10187,9 @@ var Vue = (function (exports) {
                   type: 4 /* SIMPLE_EXPRESSION */,
                   content,
                   isStatic,
-                  isConstant: isStatic,
+                  constType: isStatic
+                      ? 3 /* CAN_STRINGIFY */
+                      : 0 /* NOT_CONSTANT */,
                   loc
               };
           }
@@ -10129,8 +10208,8 @@ var Vue = (function (exports) {
                   content: value.content,
                   isStatic: false,
                   // Treat as non-constant by default. This can be potentially set to
-                  // true by `transformExpression` to make it eligible for hoisting.
-                  isConstant: false,
+                  // other values by `transformExpression` to make it eligible for hoisting.
+                  constType: 0 /* NOT_CONSTANT */,
                   loc: value.loc
               },
               arg,
@@ -10209,7 +10288,7 @@ var Vue = (function (exports) {
               type: 4 /* SIMPLE_EXPRESSION */,
               isStatic: false,
               // Set `isConstant` to false by default and will decide in transformExpression
-              isConstant: false,
+              constType: 0 /* NOT_CONSTANT */,
               content,
               loc: getSelection(context, innerStart, innerEnd)
           },
@@ -10353,24 +10432,27 @@ var Vue = (function (exports) {
       // @vue/compiler-dom), but doing it here allows us to perform only one full
       // walk of the AST and allow `stringifyStatic` to stop walking as soon as its
       // stringficiation threshold is met.
-      let hasRuntimeConstant = false;
+      let canStringify = true;
       const { children } = node;
       for (let i = 0; i < children.length; i++) {
           const child = children[i];
           // only plain elements & text calls are eligible for hoisting.
           if (child.type === 1 /* ELEMENT */ &&
               child.tagType === 0 /* ELEMENT */) {
-              let staticType;
-              if (!doNotHoistNode &&
-                  (staticType = getStaticType(child, resultCache)) > 0) {
-                  if (staticType === 2 /* HAS_RUNTIME_CONSTANT */) {
-                      hasRuntimeConstant = true;
+              const constantType = doNotHoistNode
+                  ? 0 /* NOT_CONSTANT */
+                  : getConstantType(child, resultCache);
+              if (constantType > 0 /* NOT_CONSTANT */) {
+                  if (constantType < 3 /* CAN_STRINGIFY */) {
+                      canStringify = false;
                   }
-                  child.codegenNode.patchFlag =
-                      -1 /* HOISTED */ + ( ` /* HOISTED */` );
-                  child.codegenNode = context.hoist(child.codegenNode);
-                  hasHoistedNode = true;
-                  continue;
+                  if (constantType >= 2 /* CAN_HOIST */) {
+                      child.codegenNode.patchFlag =
+                          -1 /* HOISTED */ + ( ` /* HOISTED */` );
+                      child.codegenNode = context.hoist(child.codegenNode);
+                      hasHoistedNode = true;
+                      continue;
+                  }
               }
               else {
                   // node may contain dynamic children, but its props may be eligible for
@@ -10381,7 +10463,8 @@ var Vue = (function (exports) {
                       if ((!flag ||
                           flag === 512 /* NEED_PATCH */ ||
                           flag === 1 /* TEXT */) &&
-                          !hasNonHoistableProps(child)) {
+                          getGeneratedPropsConstantType(child, resultCache) >=
+                              2 /* CAN_HOIST */) {
                           const props = getNodeProps(child);
                           if (props) {
                               codegenNode.props = context.hoist(props);
@@ -10391,13 +10474,15 @@ var Vue = (function (exports) {
               }
           }
           else if (child.type === 12 /* TEXT_CALL */) {
-              const staticType = getStaticType(child.content, resultCache);
-              if (staticType > 0) {
-                  if (staticType === 2 /* HAS_RUNTIME_CONSTANT */) {
-                      hasRuntimeConstant = true;
+              const contentType = getConstantType(child.content, resultCache);
+              if (contentType > 0) {
+                  if (contentType < 3 /* CAN_STRINGIFY */) {
+                      canStringify = false;
                   }
-                  child.codegenNode = context.hoist(child.codegenNode);
-                  hasHoistedNode = true;
+                  if (contentType >= 2 /* CAN_HOIST */) {
+                      child.codegenNode = context.hoist(child.codegenNode);
+                      hasHoistedNode = true;
+                  }
               }
           }
           // walk further
@@ -10415,15 +10500,15 @@ var Vue = (function (exports) {
               }
           }
       }
-      if (!hasRuntimeConstant && hasHoistedNode && context.transformHoist) {
+      if (canStringify && hasHoistedNode && context.transformHoist) {
           context.transformHoist(children, context, node);
       }
   }
-  function getStaticType(node, resultCache = new Map()) {
+  function getConstantType(node, resultCache = new Map()) {
       switch (node.type) {
           case 1 /* ELEMENT */:
               if (node.tagType !== 0 /* ELEMENT */) {
-                  return 0 /* NOT_STATIC */;
+                  return 0 /* NOT_CONSTANT */;
               }
               const cached = resultCache.get(node);
               if (cached !== undefined) {
@@ -10431,37 +10516,56 @@ var Vue = (function (exports) {
               }
               const codegenNode = node.codegenNode;
               if (codegenNode.type !== 13 /* VNODE_CALL */) {
-                  return 0 /* NOT_STATIC */;
+                  return 0 /* NOT_CONSTANT */;
               }
               const flag = getPatchFlag(codegenNode);
-              if (!flag && !hasNonHoistableProps(node)) {
-                  // element self is static. check its children.
-                  let returnType = 1 /* FULL_STATIC */;
+              if (!flag) {
+                  let returnType = 3 /* CAN_STRINGIFY */;
+                  // Element itself has no patch flag. However we still need to check:
+                  // 1. Even for a node with no patch flag, it is possible for it to contain
+                  // non-hoistable expressions that refers to scope variables, e.g. compiler
+                  // injected keys or cached event handlers. Therefore we need to always
+                  // check the codegenNode's props to be sure.
+                  const generatedPropsType = getGeneratedPropsConstantType(node, resultCache);
+                  if (generatedPropsType === 0 /* NOT_CONSTANT */) {
+                      resultCache.set(node, 0 /* NOT_CONSTANT */);
+                      return 0 /* NOT_CONSTANT */;
+                  }
+                  if (generatedPropsType < returnType) {
+                      returnType = generatedPropsType;
+                  }
+                  // 2. its children.
                   for (let i = 0; i < node.children.length; i++) {
-                      const childType = getStaticType(node.children[i], resultCache);
-                      if (childType === 0 /* NOT_STATIC */) {
-                          resultCache.set(node, 0 /* NOT_STATIC */);
-                          return 0 /* NOT_STATIC */;
+                      const childType = getConstantType(node.children[i], resultCache);
+                      if (childType === 0 /* NOT_CONSTANT */) {
+                          resultCache.set(node, 0 /* NOT_CONSTANT */);
+                          return 0 /* NOT_CONSTANT */;
                       }
-                      else if (childType === 2 /* HAS_RUNTIME_CONSTANT */) {
-                          returnType = 2 /* HAS_RUNTIME_CONSTANT */;
+                      if (childType < returnType) {
+                          returnType = childType;
                       }
                   }
-                  // check if any of the props contain runtime constants
-                  if (returnType !== 2 /* HAS_RUNTIME_CONSTANT */) {
+                  // 3. if the type is not already CAN_SKIP_PATCH which is the lowest non-0
+                  // type, check if any of the props can cause the type to be lowered
+                  // we can skip can_patch because it's guaranteed by the absence of a
+                  // patchFlag.
+                  if (returnType > 1 /* CAN_SKIP_PATCH */) {
                       for (let i = 0; i < node.props.length; i++) {
                           const p = node.props[i];
-                          if (p.type === 7 /* DIRECTIVE */ &&
-                              p.name === 'bind' &&
-                              p.exp &&
-                              (p.exp.type === 8 /* COMPOUND_EXPRESSION */ ||
-                                  p.exp.isRuntimeConstant)) {
-                              returnType = 2 /* HAS_RUNTIME_CONSTANT */;
+                          if (p.type === 7 /* DIRECTIVE */ && p.name === 'bind' && p.exp) {
+                              const expType = getConstantType(p.exp, resultCache);
+                              if (expType === 0 /* NOT_CONSTANT */) {
+                                  resultCache.set(node, 0 /* NOT_CONSTANT */);
+                                  return 0 /* NOT_CONSTANT */;
+                              }
+                              if (expType < returnType) {
+                                  returnType = expType;
+                              }
                           }
                       }
                   }
                   // only svg/foreignObject could be block here, however if they are
-                  // stati then they don't need to be blocks since there will be no
+                  // static then they don't need to be blocks since there will be no
                   // nested updates.
                   if (codegenNode.isBlock) {
                       codegenNode.isBlock = false;
@@ -10470,66 +10574,68 @@ var Vue = (function (exports) {
                   return returnType;
               }
               else {
-                  resultCache.set(node, 0 /* NOT_STATIC */);
-                  return 0 /* NOT_STATIC */;
+                  resultCache.set(node, 0 /* NOT_CONSTANT */);
+                  return 0 /* NOT_CONSTANT */;
               }
           case 2 /* TEXT */:
           case 3 /* COMMENT */:
-              return 1 /* FULL_STATIC */;
+              return 3 /* CAN_STRINGIFY */;
           case 9 /* IF */:
           case 11 /* FOR */:
           case 10 /* IF_BRANCH */:
-              return 0 /* NOT_STATIC */;
+              return 0 /* NOT_CONSTANT */;
           case 5 /* INTERPOLATION */:
           case 12 /* TEXT_CALL */:
-              return getStaticType(node.content, resultCache);
+              return getConstantType(node.content, resultCache);
           case 4 /* SIMPLE_EXPRESSION */:
-              return node.isConstant
-                  ? node.isRuntimeConstant
-                      ? 2 /* HAS_RUNTIME_CONSTANT */
-                      : 1 /* FULL_STATIC */
-                  : 0 /* NOT_STATIC */;
+              return node.constType;
           case 8 /* COMPOUND_EXPRESSION */:
-              let returnType = 1 /* FULL_STATIC */;
+              let returnType = 3 /* CAN_STRINGIFY */;
               for (let i = 0; i < node.children.length; i++) {
                   const child = node.children[i];
                   if (isString(child) || isSymbol(child)) {
                       continue;
                   }
-                  const childType = getStaticType(child, resultCache);
-                  if (childType === 0 /* NOT_STATIC */) {
-                      return 0 /* NOT_STATIC */;
+                  const childType = getConstantType(child, resultCache);
+                  if (childType === 0 /* NOT_CONSTANT */) {
+                      return 0 /* NOT_CONSTANT */;
                   }
-                  else if (childType === 2 /* HAS_RUNTIME_CONSTANT */) {
-                      returnType = 2 /* HAS_RUNTIME_CONSTANT */;
+                  else if (childType < returnType) {
+                      returnType = childType;
                   }
               }
               return returnType;
           default:
-              return 0 /* NOT_STATIC */;
+              return 0 /* NOT_CONSTANT */;
       }
   }
-  /**
-   * Even for a node with no patch flag, it is possible for it to contain
-   * non-hoistable expressions that refers to scope variables, e.g. compiler
-   * injected keys or cached event handlers. Therefore we need to always check the
-   * codegenNode's props to be sure.
-   */
-  function hasNonHoistableProps(node) {
+  function getGeneratedPropsConstantType(node, resultCache) {
+      let returnType = 3 /* CAN_STRINGIFY */;
       const props = getNodeProps(node);
       if (props && props.type === 15 /* JS_OBJECT_EXPRESSION */) {
           const { properties } = props;
           for (let i = 0; i < properties.length; i++) {
               const { key, value } = properties[i];
-              if (key.type !== 4 /* SIMPLE_EXPRESSION */ ||
-                  !key.isStatic ||
-                  (value.type !== 4 /* SIMPLE_EXPRESSION */ ||
-                      (!value.isStatic && !value.isConstant))) {
-                  return true;
+              const keyType = getConstantType(key, resultCache);
+              if (keyType === 0 /* NOT_CONSTANT */) {
+                  return keyType;
+              }
+              if (keyType < returnType) {
+                  returnType = keyType;
+              }
+              if (value.type !== 4 /* SIMPLE_EXPRESSION */) {
+                  return 0 /* NOT_CONSTANT */;
+              }
+              const valueType = getConstantType(value, resultCache);
+              if (valueType === 0 /* NOT_CONSTANT */) {
+                  return valueType;
+              }
+              if (valueType < returnType) {
+                  returnType = valueType;
               }
           }
       }
-      return false;
+      return returnType;
   }
   function getNodeProps(node) {
       const codegenNode = node.codegenNode;
@@ -10542,7 +10648,7 @@ var Vue = (function (exports) {
       return flag ? parseInt(flag, 10) : undefined;
   }
 
-  function createTransformContext(root, { prefixIdentifiers = false, hoistStatic = false, cacheHandlers = false, nodeTransforms = [], directiveTransforms = {}, transformHoist = null, isBuiltInComponent = NOOP, isCustomElement = NOOP, expressionPlugins = [], scopeId = null, ssr = false, ssrCssVars = ``, bindingMetadata = {}, onError = defaultOnError }) {
+  function createTransformContext(root, { prefixIdentifiers = false, hoistStatic = false, cacheHandlers = false, nodeTransforms = [], directiveTransforms = {}, transformHoist = null, isBuiltInComponent = NOOP, isCustomElement = NOOP, expressionPlugins = [], scopeId = null, ssr = false, ssrCssVars = ``, bindingMetadata = EMPTY_OBJ, inline = false, isTS = false, onError = defaultOnError }) {
       const context = {
           // options
           prefixIdentifiers,
@@ -10558,6 +10664,8 @@ var Vue = (function (exports) {
           ssr,
           ssrCssVars,
           bindingMetadata,
+          inline,
+          isTS,
           onError,
           // state
           root,
@@ -10633,7 +10741,7 @@ var Vue = (function (exports) {
           },
           hoist(exp) {
               context.hoists.push(exp);
-              const identifier = createSimpleExpression(`_hoisted_${context.hoists.length}`, false, exp.loc, true);
+              const identifier = createSimpleExpression(`_hoisted_${context.hoists.length}`, false, exp.loc, 2 /* CAN_HOIST */);
               identifier.hoisted = exp;
               return identifier;
           },
@@ -10849,19 +10957,18 @@ var Vue = (function (exports) {
       const hasHelpers = ast.helpers.length > 0;
       const useWithBlock = !prefixIdentifiers && mode !== 'module';
       // preambles
+      // in setup() inline mode, the preamble is generated in a sub context
+      // and returned separately.
+      const preambleContext =  context;
       {
-          genFunctionPreamble(ast, context);
+          genFunctionPreamble(ast, preambleContext);
       }
-      // binding optimizations
-      const optimizeSources = options.bindingMetadata
-          ? `, $props, $setup, $data, $options`
-          : ``;
       // enter render function
-      if (!ssr) {
-          push(`function render(_ctx, _cache${optimizeSources}) {`);
-      }
-      else {
-          push(`function ssrRender(_ctx, _push, _parent, _attrs${optimizeSources}) {`);
+      const functionName = ssr ? `ssrRender` : `render`;
+      const args = ssr ? ['_ctx', '_push', '_parent', '_attrs'] : ['_ctx', '_cache'];
+      const signature =  args.join(', ');
+      {
+          push(`function ${functionName}(${signature}) {`);
       }
       indent();
       if (useWithBlock) {
@@ -10919,6 +11026,7 @@ var Vue = (function (exports) {
       return {
           ast,
           code: context.code,
+          preamble:  ``,
           // SourceMapGenerator does have toJSON() method but it's not in the types
           map: context.map ? context.map.toJSON() : undefined
       };
@@ -11544,7 +11652,7 @@ var Vue = (function (exports) {
   }
   function createChildrenCodegenNode(branch, keyIndex, context) {
       const { helper } = context;
-      const keyProperty = createObjectProperty(`key`, createSimpleExpression(`${keyIndex}`, false, locStub, true));
+      const keyProperty = createObjectProperty(`key`, createSimpleExpression(`${keyIndex}`, false, locStub, 2 /* CAN_HOIST */));
       const { children } = branch;
       const firstChild = children[0];
       const needFragmentWrapper = children.length !== 1 || firstChild.type !== 1 /* ELEMENT */;
@@ -11628,7 +11736,7 @@ var Vue = (function (exports) {
                   : keyProp.exp)
               : null;
           const isStableFragment = forNode.source.type === 4 /* SIMPLE_EXPRESSION */ &&
-              forNode.source.isConstant;
+              forNode.source.constType > 0;
           const fragmentFlag = isStableFragment
               ? 64 /* STABLE_FRAGMENT */
               : keyProp
@@ -12105,7 +12213,8 @@ var Vue = (function (exports) {
                   // check for dynamic text children
                   const hasDynamicTextChild = type === 5 /* INTERPOLATION */ ||
                       type === 8 /* COMPOUND_EXPRESSION */;
-                  if (hasDynamicTextChild && !getStaticType(child)) {
+                  if (hasDynamicTextChild &&
+                      getConstantType(child) === 0 /* NOT_CONSTANT */) {
                       patchFlag |= 1 /* TEXT */;
                   }
                   // pass directly if the only child is a text node
@@ -12163,14 +12272,10 @@ var Vue = (function (exports) {
       const builtIn = isCoreComponent(tag) || context.isBuiltInComponent(tag);
       if (builtIn) {
           // built-ins are simply fallthroughs / have special handling during ssr
-          // no we don't need to import their runtime equivalents
+          // so we don't need to import their runtime equivalents
           if (!ssr)
               context.helper(builtIn);
           return builtIn;
-      }
-      // 3. user component (from setup bindings)
-      if (context.bindingMetadata[tag] === 'setup') {
-          return `$setup[${JSON.stringify(tag)}]`;
       }
       // 4. user component (resolve)
       context.helper(RESOLVE_COMPONENT);
@@ -12213,7 +12318,7 @@ var Vue = (function (exports) {
               if (value.type === 20 /* JS_CACHE_EXPRESSION */ ||
                   ((value.type === 4 /* SIMPLE_EXPRESSION */ ||
                       value.type === 8 /* COMPOUND_EXPRESSION */) &&
-                      getStaticType(value) > 0)) {
+                      getConstantType(value) > 0)) {
                   // skip if the prop is a cached handler or has constant value
                   return;
               }
@@ -12239,6 +12344,7 @@ var Vue = (function (exports) {
           const prop = props[i];
           if (prop.type === 6 /* ATTRIBUTE */) {
               const { loc, name, value } = prop;
+              let isStatic = true;
               if (name === 'ref') {
                   hasRef = true;
               }
@@ -12246,7 +12352,7 @@ var Vue = (function (exports) {
               if (name === 'is' && tag === 'component') {
                   continue;
               }
-              properties.push(createObjectProperty(createSimpleExpression(name, true, getInnerRange(loc, 0, name.length)), createSimpleExpression(value ? value.content : '', true, value ? value.loc : loc)));
+              properties.push(createObjectProperty(createSimpleExpression(name, true, getInnerRange(loc, 0, name.length)), createSimpleExpression(value ? value.content : '', isStatic, value ? value.loc : loc)));
           }
           else {
               // directives
@@ -12409,13 +12515,16 @@ var Vue = (function (exports) {
       const dirArgs = [];
       const runtime = directiveImportMap.get(dir);
       if (runtime) {
+          // built-in directive with runtime
           dirArgs.push(context.helperString(runtime));
       }
       else {
-          // inject statement for resolving directive
-          context.helper(RESOLVE_DIRECTIVE);
-          context.directives.add(dir.name);
-          dirArgs.push(toValidAssetId(dir.name, `directive`));
+          {
+              // inject statement for resolving directive
+              context.helper(RESOLVE_DIRECTIVE);
+              context.directives.add(dir.name);
+              dirArgs.push(toValidAssetId(dir.name, `directive`));
+          }
       }
       const { loc } = dir;
       if (dir.exp)
@@ -12532,7 +12641,7 @@ var Vue = (function (exports) {
       if (exp && !exp.content.trim()) {
           exp = undefined;
       }
-      let isCacheable = context.cacheHandlers && !exp;
+      let shouldCache = context.cacheHandlers && !exp;
       if (exp) {
           const isMemberExp = isMemberExpression(exp.content);
           const isInlineStatement = !(isMemberExp || fnExpRE.test(exp.content));
@@ -12540,10 +12649,12 @@ var Vue = (function (exports) {
           {
               validateBrowserExpression(exp, context, false, hasMultipleStatements);
           }
-          if (isInlineStatement || (isCacheable && isMemberExp)) {
+          if (isInlineStatement || (shouldCache && isMemberExp)) {
               // wrap inline statement in a function expression
               exp = createCompoundExpression([
-                  `${isInlineStatement ? `$event` : `(...args)`} => ${hasMultipleStatements ? `{` : `(`}`,
+                  `${isInlineStatement
+                    ?  `$event`
+                    : `${ ``}(...args)`} => ${hasMultipleStatements ? `{` : `(`}`,
                   exp,
                   hasMultipleStatements ? `}` : `)`
               ]);
@@ -12558,7 +12669,7 @@ var Vue = (function (exports) {
       if (augmentor) {
           ret = augmentor(ret);
       }
-      if (isCacheable) {
+      if (shouldCache) {
           // cache handlers so that it's always the same handler being passed down.
           // this avoids unnecessary re-renders when users use inline handlers on
           // components.
@@ -12670,7 +12781,8 @@ var Vue = (function (exports) {
                           callArgs.push(child);
                       }
                       // mark dynamic text with flag so it gets patched inside a block
-                      if (!context.ssr && child.type !== 2 /* TEXT */) {
+                      if (!context.ssr &&
+                          getConstantType(child) === 0 /* NOT_CONSTANT */) {
                           callArgs.push(`${1 /* TEXT */} /* ${PatchFlagNames[1 /* TEXT */]} */`);
                       }
                       children[i] = {
@@ -12708,8 +12820,13 @@ var Vue = (function (exports) {
           context.onError(createCompilerError(40 /* X_V_MODEL_NO_EXPRESSION */, dir.loc));
           return createTransformProps();
       }
-      const expString = exp.type === 4 /* SIMPLE_EXPRESSION */ ? exp.content : exp.loc.source;
-      if (!isMemberExpression(expString)) {
+      const rawExp = exp.loc.source;
+      const expString = exp.type === 4 /* SIMPLE_EXPRESSION */ ? exp.content : rawExp;
+      // im SFC <script setup> inline mode, the exp may have been transformed into
+      // _unref(exp)
+      const bindingType = context.bindingMetadata[rawExp];
+      const maybeRef = !true    /* SETUP_CONST */;
+      if (!isMemberExpression(expString) && !maybeRef) {
           context.onError(createCompilerError(41 /* X_V_MODEL_MALFORMED_EXPRESSION */, exp.loc));
           return createTransformProps();
       }
@@ -12719,11 +12836,20 @@ var Vue = (function (exports) {
               ? `onUpdate:${arg.content}`
               : createCompoundExpression(['"onUpdate:" + ', arg])
           : `onUpdate:modelValue`;
+      let assignmentExp;
+      const eventArg = context.isTS ? `($event: any)` : `$event`;
+      {
+          assignmentExp = createCompoundExpression([
+              `${eventArg} => (`,
+              exp,
+              ` = $event)`
+          ]);
+      }
       const props = [
           // modelValue: foo
           createObjectProperty(propName, dir.exp),
           // "onUpdate:modelValue": $event => (foo = $event)
-          createObjectProperty(eventName, createCompoundExpression([`$event => (`, exp, ` = $event)`]))
+          createObjectProperty(eventName, assignmentExp)
       ];
       // modelModifiers: { foo: true, "bar-baz": true }
       if (dir.modifiers.length && node.tagType === 1 /* COMPONENT */) {
@@ -12735,7 +12861,7 @@ var Vue = (function (exports) {
                   ? `${arg.content}Modifiers`
                   : createCompoundExpression([arg, ' + "Modifiers"'])
               : `modelModifiers`;
-          props.push(createObjectProperty(modifiersKey, createSimpleExpression(`{ ${modifiers} }`, false, dir.loc, true)));
+          props.push(createObjectProperty(modifiersKey, createSimpleExpression(`{ ${modifiers} }`, false, dir.loc, 2 /* CAN_HOIST */)));
       }
       return createTransformProps(props);
   };
@@ -12924,7 +13050,7 @@ var Vue = (function (exports) {
   };
   const parseInlineCSS = (cssText, loc) => {
       const normalized = parseStringStyle(cssText);
-      return createSimpleExpression(JSON.stringify(normalized), false, loc, true);
+      return createSimpleExpression(JSON.stringify(normalized), false, loc, 3 /* CAN_STRINGIFY */);
   };
 
   function createDOMCompilerError(code, loc) {
@@ -13323,6 +13449,8 @@ var Vue = (function (exports) {
   exports.customRef = customRef;
   exports.defineAsyncComponent = defineAsyncComponent;
   exports.defineComponent = defineComponent;
+  exports.defineEmit = defineEmit;
+  exports.defineProps = defineProps;
   exports.getCurrentInstance = getCurrentInstance;
   exports.getTransitionRawChildren = getTransitionRawChildren;
   exports.h = h;
@@ -13383,6 +13511,7 @@ var Vue = (function (exports) {
   exports.transformVNodeArgs = transformVNodeArgs;
   exports.triggerRef = triggerRef;
   exports.unref = unref;
+  exports.useContext = useContext;
   exports.useCssModule = useCssModule;
   exports.useCssVars = useCssVars;
   exports.useSSRContext = useSSRContext;
@@ -13402,6 +13531,8 @@ var Vue = (function (exports) {
   exports.withKeys = withKeys;
   exports.withModifiers = withModifiers;
   exports.withScopeId = withScopeId;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
 
   return exports;
 

@@ -187,7 +187,7 @@
         "rg": "Red gladiador",
         "ro": "Rompecabezas",
         "sa": "Sable",
-        "si": "Sai",
+        "sai": "Sai",
         "sh": "Shuriken",
         "tf": "Tonfa",
         "tr": "Tridente",
@@ -197,6 +197,24 @@
             "apr": "Apresar",
             "lu": "Lucha libre / placar",
             "am": "Artes marciales"
+        }
+    },
+    "stats": {
+        "warrior": {
+            "hp"       : [18, 162, 0.61, 0.93],
+            "bd"       : [5],
+            "pp"       : [0],
+            "ob1"      : [29, 140, 0.93, 0.69],
+            "ob2"      : [18, 120, 0.57, 0.86],
+            "mm"       : [0, 0, 0, 0],
+            "general"  : [6, 70, 0.5, 0.85],
+            "ss1"      : [1, 58, 0.43, 0.75],
+            "ss2"      : [2, 42, 0.43, 0.75],
+            "per"      : [1, 60, 0.44, 0.75],
+            "runes"    : [-30, 19, 0.67, 0.8],
+            "basespell": [0],
+            "spelllist": [0, 2, 0.32, 0.45],
+            "craft"    : [-2, 64, 1, 1]
         }
     }
 }

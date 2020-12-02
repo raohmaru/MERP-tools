@@ -79,7 +79,7 @@ export function applyRule(rule, str) {
 }
 
 /**
- * Normalizes a string according to the phonetic rules found in the specimen.
+ * Normalizes a string according to the phonetic rules found in the set.
  * @param {String} str
  * @param {Object} chain 
  * @returns {String}

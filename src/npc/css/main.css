@@ -3,3 +3,24 @@
 body {
     background-color: #ddd;
 }
+
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #999;
+}
+
+abbr[title] {
+    text-decoration: none;
+    cursor: help;
+}
+    abbr[title]:hover,
+    abbr[title]:focus {
+        text-decoration: underline dotted;
+    }
+
+.center {
+    text-align: center;
+}

@@ -928,19 +928,27 @@ var Vue = (function (exports) {
       }
       return createReactiveObject(target, false, mutableHandlers, mutableCollectionHandlers);
   }
-  // Return a reactive-copy of the original object, where only the root level
-  // properties are reactive, and does NOT unwrap refs nor recursively convert
-  // returned properties.
+  /**
+   * Return a shallowly-reactive copy of the original object, where only the root
+   * level properties are reactive. It also does not auto-unwrap refs (even at the
+   * root level).
+   */
   function shallowReactive(target) {
       return createReactiveObject(target, false, shallowReactiveHandlers, shallowCollectionHandlers);
   }
+  /**
+   * Creates a readonly copy of the original object. Note the returned copy is not
+   * made reactive, but `readonly` can be called on an already reactive object.
+   */
   function readonly(target) {
       return createReactiveObject(target, true, readonlyHandlers, readonlyCollectionHandlers);
   }
-  // Return a reactive-copy of the original object, where only the root level
-  // properties are readonly, and does NOT unwrap refs nor recursively convert
-  // returned properties.
-  // This is used for creating the props proxy object for stateful components.
+  /**
+   * Returns a reactive-copy of the original object, where only the root level
+   * properties are readonly, and does NOT unwrap refs nor recursively convert
+   * returned properties.
+   * This is used for creating the props proxy object for stateful components.
+   */
   function shallowReadonly(target) {
       return createReactiveObject(target, true, shallowReadonlyHandlers, readonlyCollectionHandlers);
   }
@@ -1402,7 +1410,7 @@ var Vue = (function (exports) {
   function invalidateJob(job) {
       const i = queue.indexOf(job);
       if (i > -1) {
-          queue[i] = null;
+          queue.splice(i, 1);
       }
   }
   function queueCb(cb, activeQueue, pendingQueue, index) {
@@ -1486,8 +1494,6 @@ var Vue = (function (exports) {
       //    priority number)
       // 2. If a component is unmounted during a parent component's update,
       //    its update can be skipped.
-      // Jobs can never be null before flush starts, since they are only invalidated
-      // during execution of another flushed job.
       queue.sort((a, b) => getId(a) - getId(b));
       try {
           for (flushIndex = 0; flushIndex < queue.length; flushIndex++) {
@@ -1559,28 +1565,39 @@ var Vue = (function (exports) {
       const id = instance.type.__hmrId;
       let record = map.get(id);
       if (!record) {
-          createRecord(id);
+          createRecord(id, instance.type);
           record = map.get(id);
       }
-      record.add(instance);
+      record.instances.add(instance);
   }
   function unregisterHMR(instance) {
-      map.get(instance.type.__hmrId).delete(instance);
+      map.get(instance.type.__hmrId).instances.delete(instance);
   }
-  function createRecord(id) {
+  function createRecord(id, component) {
+      if (!component) {
+          warn(`HMR API usage is out of date.\n` +
+              `Please upgrade vue-loader/vite/rollup-plugin-vue or other relevant ` +
+              `depdendency that handles Vue SFC compilation.`);
+          component = {};
+      }
       if (map.has(id)) {
           return false;
       }
-      map.set(id, new Set());
+      map.set(id, {
+          component: isClassComponent(component) ? component.__vccOpts : component,
+          instances: new Set()
+      });
       return true;
   }
   function rerender(id, newRender) {
       const record = map.get(id);
       if (!record)
           return;
+      if (newRender)
+          record.component.render = newRender;
       // Array.from creates a snapshot which avoids the set being mutated during
       // updates
-      Array.from(record).forEach(instance => {
+      Array.from(record.instances).forEach(instance => {
           if (newRender) {
               instance.render = newRender;
           }
@@ -1597,25 +1614,25 @@ var Vue = (function (exports) {
           return;
       // Array.from creates a snapshot which avoids the set being mutated during
       // updates
-      Array.from(record).forEach(instance => {
-          const comp = instance.type;
-          if (!hmrDirtyComponents.has(comp)) {
-              // 1. Update existing comp definition to match new one
-              newComp = isClassComponent(newComp) ? newComp.__vccOpts : newComp;
-              extend(comp, newComp);
-              for (const key in comp) {
-                  if (!(key in newComp)) {
-                      delete comp[key];
-                  }
+      const { component, instances } = record;
+      if (!hmrDirtyComponents.has(component)) {
+          // 1. Update existing comp definition to match new one
+          newComp = isClassComponent(newComp) ? newComp.__vccOpts : newComp;
+          extend(component, newComp);
+          for (const key in component) {
+              if (!(key in newComp)) {
+                  delete component[key];
               }
-              // 2. Mark component dirty. This forces the renderer to replace the component
-              // on patch.
-              hmrDirtyComponents.add(comp);
-              // 3. Make sure to unmark the component after the reload.
-              queuePostFlushCb(() => {
-                  hmrDirtyComponents.delete(comp);
-              });
           }
+          // 2. Mark component dirty. This forces the renderer to replace the component
+          // on patch.
+          hmrDirtyComponents.add(component);
+          // 3. Make sure to unmark the component after the reload.
+          queuePostFlushCb(() => {
+              hmrDirtyComponents.delete(component);
+          });
+      }
+      Array.from(instances).forEach(instance => {
           if (instance.parent) {
               // 4. Force the parent instance to re-render. This will cause all updated
               // components to be unmounted and re-mounted. Queue the update so that we
@@ -2022,7 +2039,7 @@ var Vue = (function (exports) {
       if (nextVNode.dirs || nextVNode.transition) {
           return true;
       }
-      if (optimized && patchFlag > 0) {
+      if (optimized && patchFlag >= 0) {
           if (patchFlag & 1024 /* DYNAMIC_SLOTS */) {
               // slot content that references values that might have changed,
               // e.g. in a v-for
@@ -4510,7 +4527,7 @@ var Vue = (function (exports) {
       }
       else {
           if (vnode.shapeFlag & 4 /* STATEFUL_COMPONENT */) {
-              value = vnode.component.proxy;
+              value = vnode.component.exposed || vnode.component.proxy;
           }
           else {
               value = vnode.el;
@@ -6561,7 +6578,9 @@ var Vue = (function (exports) {
       // assets
       components, directives, 
       // lifecycle
-      beforeMount, mounted, beforeUpdate, updated, activated, deactivated, beforeDestroy, beforeUnmount, destroyed, unmounted, render, renderTracked, renderTriggered, errorCaptured } = options;
+      beforeMount, mounted, beforeUpdate, updated, activated, deactivated, beforeDestroy, beforeUnmount, destroyed, unmounted, render, renderTracked, renderTriggered, errorCaptured, 
+      // public API
+      expose } = options;
       const publicThis = instance.proxy;
       const ctx = instance.ctx;
       const globalMixins = instance.appContext.mixins;
@@ -6776,6 +6795,22 @@ var Vue = (function (exports) {
       }
       if (unmounted) {
           onUnmounted(unmounted.bind(publicThis));
+      }
+      if (isArray(expose)) {
+          if (!asMixin) {
+              if (expose.length) {
+                  const exposed = instance.exposed || (instance.exposed = proxyRefs({}));
+                  expose.forEach(key => {
+                      exposed[key] = toRef(publicThis, key);
+                  });
+              }
+              else if (!instance.exposed) {
+                  instance.exposed = EMPTY_OBJ;
+              }
+          }
+          else {
+              warn(`The \`expose\` option is ignored when used in mixins.`);
+          }
       }
   }
   function callSyncHook(name, type, options, instance, globalMixins) {
@@ -7184,6 +7219,7 @@ var Vue = (function (exports) {
           update: null,
           render: null,
           proxy: null,
+          exposed: null,
           withProxy: null,
           effects: null,
           provides: parent ? parent.provides : Object.create(appContext.provides),
@@ -7327,7 +7363,9 @@ var Vue = (function (exports) {
   function handleSetupResult(instance, setupResult, isSSR) {
       if (isFunction(setupResult)) {
           // setup returned an inline render function
-          instance.render = setupResult;
+          {
+              instance.render = setupResult;
+          }
       }
       else if (isObject(setupResult)) {
           if ( isVNode(setupResult)) {
@@ -7419,10 +7457,19 @@ var Vue = (function (exports) {
       }
   };
   function createSetupContext(instance) {
+      const expose = exposed => {
+          if ( instance.exposed) {
+              warn(`expose() should be called only once per setup().`);
+          }
+          instance.exposed = proxyRefs(exposed);
+      };
       {
           // We use getters in dev in case libs like test-utils overwrite instance
           // properties (overwrites should not be done in prod)
           return Object.freeze({
+              get props() {
+                  return instance.props;
+              },
               get attrs() {
                   return new Proxy(instance.attrs, attrHandlers);
               },
@@ -7431,7 +7478,8 @@ var Vue = (function (exports) {
               },
               get emit() {
                   return (event, ...args) => instance.emit(event, ...args);
-              }
+              },
+              expose
           });
       }
   }
@@ -7608,6 +7656,28 @@ var Vue = (function (exports) {
   }
   function createInnerComp(comp, { vnode: { props, children } }) {
       return createVNode(comp, props, children);
+  }
+
+  // implementation
+  function defineProps(props) {
+      if ( props) {
+          warn(`defineProps() is a compiler-hint helper that is only usable inside ` +
+              `<script setup> of a single file component. Its arguments should be ` +
+              `compiled away and passing it at runtime has no effect.`);
+      }
+      return null;
+  }
+  // implementation
+  function defineEmit(emitOptions) {
+      if ( emitOptions) {
+          warn(`defineEmit() is a compiler-hint helper that is only usable inside ` +
+              `<script setup> of a single file component. Its arguments should be ` +
+              `compiled away and passing it at runtime has no effect.`);
+      }
+      return null;
+  }
+  function useContext() {
+      return getCurrentInstance().setupContext;
   }
 
   // Actual implementation
@@ -7909,7 +7979,7 @@ var Vue = (function (exports) {
   }
 
   // Core API ------------------------------------------------------------------
-  const version = "3.0.2";
+  const version = "3.0.3";
   /**
    * SSR utils for \@vue/server-renderer. Only exposed in cjs builds.
    * @internal
@@ -8309,7 +8379,11 @@ var Vue = (function (exports) {
       }
   }
 
-  function useCssVars(getter, scoped = false) {
+  /**
+   * Runtime helper for SFC's CSS variable injection feature.
+   * @private
+   */
+  function useCssVars(getter) {
       const instance = getCurrentInstance();
       /* istanbul ignore next */
       if (!instance) {
@@ -8317,20 +8391,17 @@ var Vue = (function (exports) {
               warn(`useCssVars is called without current active component instance.`);
           return;
       }
-      const prefix = scoped && instance.type.__scopeId
-          ? `${instance.type.__scopeId.replace(/^data-v-/, '')}-`
-          : ``;
-      const setVars = () => setVarsOnVNode(instance.subTree, getter(instance.proxy), prefix);
-      onMounted(() => watchEffect(setVars));
+      const setVars = () => setVarsOnVNode(instance.subTree, getter(instance.proxy));
+      onMounted(() => watchEffect(setVars, { flush: 'post' }));
       onUpdated(setVars);
   }
-  function setVarsOnVNode(vnode, vars, prefix) {
+  function setVarsOnVNode(vnode, vars) {
       if ( vnode.shapeFlag & 128 /* SUSPENSE */) {
           const suspense = vnode.suspense;
           vnode = suspense.activeBranch;
           if (suspense.pendingBranch && !suspense.isHydrating) {
               suspense.effects.push(() => {
-                  setVarsOnVNode(suspense.activeBranch, vars, prefix);
+                  setVarsOnVNode(suspense.activeBranch, vars);
               });
           }
       }
@@ -8341,11 +8412,11 @@ var Vue = (function (exports) {
       if (vnode.shapeFlag & 1 /* ELEMENT */ && vnode.el) {
           const style = vnode.el.style;
           for (const key in vars) {
-              style.setProperty(`--${prefix}${key}`, unref(vars[key]));
+              style.setProperty(`--${key}`, vars[key]);
           }
       }
       else if (vnode.type === Fragment) {
-          vnode.children.forEach(c => setVarsOnVNode(c, vars, prefix));
+          vnode.children.forEach(c => setVarsOnVNode(c, vars));
       }
   }
 
@@ -9146,8 +9217,10 @@ var Vue = (function (exports) {
       target.__VUE__ = true;
       setDevtoolsHook(target.__VUE_DEVTOOLS_GLOBAL_HOOK__);
       {
-          console.info(`You are running a development build of Vue.\n` +
-              `Make sure to use the production build (*.prod.js) when deploying for production.`);
+          {
+              console.info(`You are running a development build of Vue.\n` +
+                  `Make sure to use the production build (*.prod.js) when deploying for production.`);
+          }
           initCustomFormatter();
       }
   }
@@ -9192,6 +9265,8 @@ var Vue = (function (exports) {
   exports.customRef = customRef;
   exports.defineAsyncComponent = defineAsyncComponent;
   exports.defineComponent = defineComponent;
+  exports.defineEmit = defineEmit;
+  exports.defineProps = defineProps;
   exports.getCurrentInstance = getCurrentInstance;
   exports.getTransitionRawChildren = getTransitionRawChildren;
   exports.h = h;
@@ -9252,6 +9327,7 @@ var Vue = (function (exports) {
   exports.transformVNodeArgs = transformVNodeArgs;
   exports.triggerRef = triggerRef;
   exports.unref = unref;
+  exports.useContext = useContext;
   exports.useCssModule = useCssModule;
   exports.useCssVars = useCssVars;
   exports.useSSRContext = useSSRContext;
@@ -9271,6 +9347,8 @@ var Vue = (function (exports) {
   exports.withKeys = withKeys;
   exports.withModifiers = withModifiers;
   exports.withScopeId = withScopeId;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
 
   return exports;
 

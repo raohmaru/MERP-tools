@@ -17,7 +17,7 @@
             </fieldset>
 
             <fieldset>
-                <Combobox ref="gender" id="gender" title="Género"
+                <Combobox ref="gender" id="npc-gender" title="Género"
                           :data="data.genders"
                           v-model="gender"/>
             </fieldset>
@@ -29,7 +29,7 @@
             </fieldset>
             
             <fieldset>
-                <Combobox ref="job" id="job" title="Ocupación" :enable="true"
+                <Combobox ref="job" id="job" title="Oficio" :enable="true" :disabled="true"
                           :data="data.jobs"
                           v-model="job"/>
             </fieldset>
@@ -39,20 +39,11 @@
                           :data="data.races"
                           v-model="race"/>
             </fieldset>
-
+            
             <fieldset>
-                <label for="npc-level-start">Nivel</label>
-                <input type="number" name="level-start" id="npc-level-start" min="1" max="50"
-                       v-model="levelStart"
-                       :disabled="randomLevel">
-                a
-                <input type="number" name="level-end" max="50"
-                       v-model="levelEnd"
-                       :min="levelStart"
-                       :disabled="randomLevel">
-                <input type="checkbox" id="npc-level-random"
-                       v-model="randomLevel">
-                <label for="npc-level-random">Aleatorio</label>
+                <RangeNumeric ref="level" id="npc-level" title="Nivel" :min="1" :max="levelMax"
+                       :random="true"
+                       v-model="level"/>
             </fieldset>
             
             <fieldset>
@@ -68,71 +59,32 @@
             </fieldset>
 
             <fieldset>
-                <input type="checkbox" name="shield" id="npc-shield">
+                <input type="checkbox" value="shield" id="npc-shield"
+                       v-model="shield">
                 <label for="npc-shield">Escudo</label>
+                <input type="checkbox" value="magic" id="npc-magicdef"
+                       v-model="shield">
+                <label for="npc-magicdef">Defensa mágica</label>
             </fieldset>
-
+            
             <fieldset>
-                <label for="npc-variation">Variación</label>
-                <input type="range" name="variation" id="npc-variation" min="0" max="100" step="1"
-                       v-model="variation">
-                <input type="number" min="0" max="100"
-                       v-model="variation">%
+                <Slider ref="variation" id="npc-variation" title="Variación"
+                        :min="0" :max="100" :step="1"
+                        v-model="variation"/>
             </fieldset>
 
             <input type="submit" value="Generar"> <!-- <input type="number" name="qty"> -->
         </form>
 
         <article>
-            <table>
-                <caption>
-                    {{ npc.name }} ({{ npc.race.label }}<span v-if="npc.gender.id !== 'nd'">, {{ npc.gender.label }}</span>)
-                </caption>
-                <thead>
-                    <tr>
-                        <th>Profesión</th>
-                        <th><abbr title="Nivel">#</abbr></th>
-                        <th><abbr title="Tipo de armadura (Bonificación defensiva)">TA (BD)</abbr></th>
-                        <th><abbr title="Puntos de vida">Pv</abbr></th>
-                        <th><abbr title="Puntos de poder">PP</abbr></th>
-                        <th><abbr title="Bonificación ofensiva con el Arma principal">BO 1ª</abbr></th>
-                        <th><abbr title="Bonificación ofensiva con el Arma secundaria">BO 2ª</abbr></th>
-                        <th><abbr title="Maniobra y movimiento">MM</abbr></th>
-                        <th><abbr title="Habilidades generales">HG</abbr></th>
-                        <th><abbr title="Acechar y esconderse">Acech. Escond.</abbr></th>
-                        <th><abbr title="Abrir cerraduras / Desactivar trampas">Cerrad./Tramp.</abbr></th>
-                        <th><abbr title="Percepción">Per.</abbr></th>
-                        <th><abbr title="Leer runas">Runas</abbr></th>
-                        <th><abbr title="Usar objetos">Usar</abbr></th>
-                        <th><abbr title="Bonificación sortilegios base (cantidad de listas de sortilegios)">Sort. (#)</abbr></th>
-                        <th><span title="Bonificación por habilidad de Oficio relacionada">Oficio</span></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            {{ npc.prof.label }}
-                            <span v-if="npc.job.label">/ {{ npc.job.label }}</span>
-                        </td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td><abbr :title="npc.atk1.label">{{ npc.atk1.id }}</abbr></td>
-                        <td><abbr :title="npc.atk2.label">{{ npc.atk2.id }}</abbr></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
+            <p class="center">
+                <strong>{{ npc.name }}</strong> ({{ npc.race.label }}<span v-if="npc.gender.id !== 'nd'">, {{ npc.gender.label }}</span>)
+            </p>
+            
+            <section>
+                <Stats ref="stats" :data="data.stats" :npc="npc" :level-max="levelMax"
+                       :variation="variation" :shield="shield"/>
+            </section>
             
             <section>
                 Rasgos de interpretación
@@ -171,7 +123,7 @@
         &copy; 2020 La Tierra de Mierda
     </footer>
 
-    <script src="../js/vendor/vue.v3.0.2.global.js"></script>
+    <script src="../js/vendor/vue.v3.0.3.global.js"></script>
     <script src="../../dist/npc/js/app.js"></script>
 </body>
 

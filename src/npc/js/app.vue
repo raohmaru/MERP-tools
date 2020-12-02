@@ -1,23 +1,27 @@
 <script>
-import { Name, Combobox } from './components/index.js';
+import * as components from './components/index.js';
+import { computed } from 'vue';
 
 export default {
-    components: {
-        Name,
-        Combobox
-    },
+    components,
     
     data() {
         return {
             data: {},
             gender: 'random',
-            prof: 'random',
+            prof: 'warrior',
             job: 'random',
-            race: 'random',
+            race: 'haradan',
             atk1: 'random',
             atk2: 'random',
+            level: [1, 10],
+            levelMax: 20,
+            shield: [],
+            variation: 5,
+            items: [],
             npc: {
                 name: '',
+                level: null,
                 gender: {
                     id: 'nd',
                     label: ''
@@ -42,12 +46,15 @@ export default {
                     id: '',
                     label: ''
                 }
-            },
-            randomLevel: false,
-            levelStart: 1,
-            levelEnd: 1,
-            variation: 5
+            }
         };
+    },
+    
+    provide() {
+        return {
+            // Data available for components and makes them reactive
+            items: computed(() => this.items)
+        }
     },
 
     mounted() {
@@ -55,14 +62,23 @@ export default {
     },
 
     watch: {
-        levelStart(newValue, oldValue) {
-            this.levelEnd = Math.max(this.levelEnd, newValue);
+        shield(newValue, oldValue) {
+            if (newValue.includes('shield') && !oldValue.includes('shield')) {
+                // Injected properties does now triggers a change unless they are replaced
+                this.items = [...this.items, {
+                    name: 'Escudo',
+                    bonus: 25,
+                    mod: 'bd'
+                }];
+            } else if (!newValue.includes('shield') && oldValue.includes('shield')) {
+                this.items = this.items.filter(it => it.name !== 'Escudo');
+            }
         }
     },
 
     methods: {
         async loadData() {
-            const data = await fetch('data/form.json');
+            const data = await fetch('data/npc.json');
             const res = await data.json();
             this.data = Object.assign({}, res);
         },
@@ -77,6 +93,9 @@ export default {
             npc.job    = comps.job.getValue();
             npc.atk1   = comps.atk1.getValue();
             npc.atk2   = comps.atk2.getValue();
+            npc.level  = comps.level.getValue();
+
+            comps.stats.fill();
         }
     }
 };

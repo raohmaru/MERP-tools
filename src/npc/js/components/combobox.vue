@@ -1,11 +1,11 @@
 <template>
     <input type="checkbox"
-            v-model="enabled"
+            v-model="disabled"
             v-if="enable">
-    <label :for="'npc-' + id">{{ title }}</label>
-    <select :name="id" :id="'npc-' + id"
+    <label :for="id">{{ title }}</label>
+    <select :name="id" :id="id"
             v-model="value"
-            :disabled="!enabled">
+            :disabled="disabled">
         <option value="random">Al azar</option>
         <template v-for="(val, key) of data">
             <option v-if="typeof(val) === 'string'"
@@ -24,12 +24,7 @@ import { sample } from '@utils/random.js'
 import { flat } from '@utils/object.js'
 
 export default {
-    props: ['id', 'title', 'data', 'enable', 'modelValue'],
-    data() {
-        return {
-            enabled: true
-        };
-    },
+    props: ['id', 'title', 'data', 'enable', 'disabled', 'modelValue'],
     computed: {
         value: {
             get() {

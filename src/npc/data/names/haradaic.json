@@ -32,13 +32,13 @@
             "type": "female",
             "regex": "[eiou]$",
             "repl": "a",
-            "prob": 0.7
+            "prob": 0.5
         },
         {
             "type": "female",
             "regex": "([^aeiou]$)",
             "repl": "$1a",
-            "prob": 0.7
+            "prob": 0.5
         }
     ],
     "list": [
