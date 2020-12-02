@@ -1,0 +1,65 @@
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats 🍃 MERP Tools</title>
+    <style>
+        body {
+            background-color: #666;
+        }
+
+        #stage {
+            background-color: #000;
+        }
+
+        #options {
+            display: flex;
+            align-items: start;
+            margin-top: 0.5em;
+        }
+
+        input[type="number"] {
+            width: 60px;
+        }
+
+        .numbers {
+            margin-left: 0.3em;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="stage" width="600" height="400"></canvas>
+    <div id="options">
+        <select id="easing" multiple size=16>
+            <option value="Linear.None">Linear</option>
+            <option value="Sinusoidal.In">Sinusoidal.In</option>
+            <option value="Quadratic.In">Quadratic.In</option>
+            <option value="Cubic.In">Cubic.In</option>
+            <option value="Quartic.In">Quartic.In</option>
+            <option value="Quintic.In">Quintic.In</option>
+            <option value="Exponential.In">Exponential.In</option>
+            <option value="Circular.In">Circular.In</option>
+            <option value="Sinusoidal.Out">Sinusoidal.Out</option>
+            <option value="Quadratic.Out" selected>Quadratic.Out</option>
+            <option value="Cubic.Out">Cubic.Out</option>
+            <option value="Quartic.Out">Quartic.Out</option>
+            <option value="Quintic.Out">Quintic.Out</option>
+            <option value="Exponential.Out">Exponential.Out</option>
+            <option value="Circular.Out">Circular.Out</option>
+            <option value="bezier">Bezier</option>
+        </select>
+        <div class="numbers">
+            <input type="number" id="min" value="0">
+            <input type="number" id="max" value="162">
+            <input type="number" id="bx" min="0" max="2" step="0.01" value="0.56" lang="en">
+            <input type="number" id="by" min="0" max="2" step="0.01" value="0.999" lang="en">
+            <button id="copy">Copy</button>
+        </div>
+    </div>
+
+    <script src="js/stats.js" type="module"></script>
+</body>
+
+</html>
