@@ -13,7 +13,7 @@
     <main id="npcgen">
         <form action="" @submit.prevent="generate">
             <fieldset>
-                <Name ref="name"/>
+                <Name ref="name" v-model="name"/>
             </fieldset>
 
             <fieldset>
@@ -29,7 +29,7 @@
             </fieldset>
             
             <fieldset>
-                <Combobox ref="job" id="job" title="Oficio" :enable="true" :disabled="true"
+                <Combobox ref="job" id="job" title="Oficio" :show-enable="true" :enabled="false"
                           :data="data.jobs"
                           v-model="job"/>
             </fieldset>
@@ -42,7 +42,7 @@
             
             <fieldset>
                 <RangeNumeric ref="level" id="npc-level" title="Nivel" :min="1" :max="levelMax"
-                       :random="true"
+                       :range="false"
                        v-model="level"/>
             </fieldset>
             
@@ -56,6 +56,12 @@
                 <Combobox ref="atk2" id="atk2" title="Ataque secundario"
                           :data="data.attacks"
                           v-model="atk2"/>
+            </fieldset>
+            
+            <fieldset>
+                <Combobox ref="armor" id="armor" title="Armadura" random-label="Profesional"
+                          :data="data.armor"
+                          v-model="armor"/>
             </fieldset>
 
             <fieldset>
@@ -78,11 +84,11 @@
 
         <article>
             <p class="center">
-                <strong>{{ npc.name }}</strong> ({{ npc.race.label }}<span v-if="npc.gender.id !== 'nd'">, {{ npc.gender.label }}</span>)
+                <strong>{{ name }}</strong> ({{ npc.race?.label }}<span v-if="npc.gender?.id !== 'nd'">, {{ npc.gender?.label }}</span>)
             </p>
             
             <section>
-                <Stats ref="stats" :data="data.stats" :npc="npc" :level-max="levelMax"
+                <Stats ref="stats" :data="data.stats" :level-max="levelMax"
                        :variation="variation" :shield="shield"/>
             </section>
             

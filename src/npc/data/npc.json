@@ -199,22 +199,378 @@
             "am": "Artes marciales"
         }
     },
+    "armor": {
+        "sa": "Sin armadura",
+        "c":  "Cuero",
+        "ce": "Cuero endurecido",
+        "cm": "Cota de mallas",
+        "co": "Coraza"
+    },
     "stats": {
         "warrior": {
             "hp"       : [18, 162, 0.61, 0.93],
-            "bd"       : [5],
-            "pp"       : [0],
+            "armor"    : { "1": "ce", "5": "cm", "8": "co" },
+            "bd"       : [5, 10],
+            "pp"       : [0, 1],
             "ob1"      : [29, 140, 0.93, 0.69],
             "ob2"      : [18, 120, 0.57, 0.86],
-            "mm"       : [0, 0, 0, 0],
+            "mm"       : [23, 45, 0.5, 1],
             "general"  : [6, 70, 0.5, 0.85],
             "ss1"      : [1, 58, 0.43, 0.75],
             "ss2"      : [2, 42, 0.43, 0.75],
             "per"      : [1, 60, 0.44, 0.75],
             "runes"    : [-30, 19, 0.67, 0.8],
-            "basespell": [0],
+            "basespell": [0, 1],
             "spelllist": [0, 2, 0.32, 0.45],
             "craft"    : [-2, 64, 1, 1]
+        }
+    },
+    "defs": {
+        "stats": {
+            "hp": {
+                "neg": false,
+                "min": 1
+            },
+            "bd": {
+                "neg": false
+            },
+            "pp": {
+                "neg": false
+            },
+            "basespell": {
+                "neg": false
+            },
+            "spelllist": {
+                "neg": false
+            },
+            "craft": {
+                "neg": false
+            }
+        },
+        "races": {
+            "umli": {
+                "stats": {
+                    "hp": 10,
+                    "bd": 0,
+                    "ob1": 5,
+                    "ob2": 0,
+                    "mm": {
+                        "armor": {
+                            "sa": 0,
+                            "c":  0,
+                            "ce": 0,
+                            "cm": 5,
+                            "co": 5
+                        }
+                    },
+                    "ss1": -5,
+                    "ss2": 0,
+                    "per": -5,
+                    "runes": 0
+                }
+            },
+            "wose": {
+                "stats": {
+                    "hp": 5,
+                    "bd": 0,
+                    "ob1": 0,
+                    "ob2": 0,
+                    "mm": {
+                        "armor": {
+                            "sa": 0,
+                            "c":  0,
+                            "ce": 0,
+                            "cm": 0,
+                            "co": 0
+                        }
+                    },
+                    "ss1": -5,
+                    "ss2": 0,
+                    "per": 0,
+                    "runes": 0
+                }
+            },
+            "hobbit": {
+                "stats": {
+                    "hp": 15,
+                    "bd": 15,
+                    "ob1": -20,
+                    "ob2": 15,
+                    "mm": {
+                        "armor": {
+                            "sa": 15,
+                            "c":  15,
+                            "ce": 15,
+                            "cm": -20,
+                            "co": -20
+                        }
+                    },
+                    "ss1": -5,
+                    "ss2": 0,
+                    "per": -5,
+                    "runes": 0
+                }
+            },
+            "dwarf": {
+                "stats": {
+                    "hp": 15,
+                    "bd": -5,
+                    "ob1": 5,
+                    "ob2": -5,
+                    "mm": {
+                        "armor": {
+                            "sa": -5,
+                            "c":  -5,
+                            "ce": -5,
+                            "cm": 5,
+                            "co": 5
+                        }
+                    },
+                    "ss1": -5,
+                    "ss2": 0,
+                    "per": -5,
+                    "runes": 0
+                }
+            },
+            "noldor": {
+                "stats": {
+                    "hp": 10,
+                    "bd": 15,
+                    "ob1": 0,
+                    "ob2": 15,
+                    "mm": {
+                        "armor": {
+                            "sa": 15,
+                            "c":  15,
+                            "ce": 15,
+                            "cm": 0,
+                            "co": 0
+                        }
+                    },
+                    "ss1": 15,
+                    "ss2": 5,
+                    "per": 5,
+                    "runes": 5
+                }
+            },
+            "silvan": {
+                "stats": {
+                    "hp": 0,
+                    "bd": 10,
+                    "ob1": 0,
+                    "ob2": 10,
+                    "mm": {
+                        "armor": {
+                            "sa": 10,
+                            "c":  10,
+                            "ce": 10,
+                            "cm": 0,
+                            "co": 0
+                        }
+                    },
+                    "ss1": 5,
+                    "ss2": 0,
+                    "per": 5,
+                    "runes": 0
+                }
+            },
+            "sindar": {
+                "stats": {
+                    "hp": 5,
+                    "bd": 10,
+                    "ob1": 0,
+                    "ob2": 10,
+                    "mm": {
+                        "armor": {
+                            "sa": 10,
+                            "c":  10,
+                            "ce": 10,
+                            "cm": 0,
+                            "co": 0
+                        }
+                    },
+                    "ss1": 10,
+                    "ss2": 0,
+                    "per": 5,
+                    "runes": 0
+                }
+            },
+            "half-elven": {
+                "stats": {
+                    "hp": 5,
+                    "bd": 5,
+                    "ob1": 5,
+                    "ob2": 5,
+                    "mm": {
+                        "armor": {
+                            "sa": 5,
+                            "c":  5,
+                            "ce": 5,
+                            "cm": 5,
+                            "co": 5
+                        }
+                    },
+                    "ss1": 5,
+                    "ss2": 0,
+                    "per": 0,
+                    "runes": 0
+                }
+            },
+            "dunadan": {
+                "stats": {
+                    "hp": 10,
+                    "bd": 0,
+                    "ob1": 5,
+                    "ob2": 0,
+                    "mm": {
+                        "armor": {
+                            "sa": 0,
+                            "c":  0,
+                            "ce": 0,
+                            "cm": 5,
+                            "co": 5
+                        }
+                    },
+                    "ss1": 5,
+                    "ss2": 0,
+                    "per": 0,
+                    "runes": 0
+                }
+            },
+            "half-orc": {
+                "stats": {
+                    "hp": 5,
+                    "bd": 0,
+                    "ob1": 5,
+                    "ob2": 0,
+                    "mm": {
+                        "armor": {
+                            "sa": 0,
+                            "c":  0,
+                            "ce": 0,
+                            "cm": 5,
+                            "co": 5
+                        }
+                    },
+                    "ss1": -5,
+                    "ss2": 0,
+                    "per": 0,
+                    "runes": 0
+                }
+            },
+            "half-troll": {
+                "stats": {
+                    "hp": 10,
+                    "bd": -5,
+                    "ob1": 10,
+                    "ob2": -5,
+                    "mm": {
+                        "armor": {
+                            "sa": -5,
+                            "c":  -5,
+                            "ce": -5,
+                            "cm": 10,
+                            "co": 10
+                        }
+                    },
+                    "ss1": -5,
+                    "ss2": -5,
+                    "per": -5,
+                    "runes": -5
+                }
+            },
+            "olog-hai": {
+                "stats": {
+                    "hp": 15,
+                    "bd": -5,
+                    "ob1": 20,
+                    "ob2": -5,
+                    "mm": {
+                        "armor": {
+                            "sa": -5,
+                            "c":  -5,
+                            "ce": -5,
+                            "cm": 20,
+                            "co": 20
+                        }
+                    },
+                    "ss1": -10,
+                    "ss2": -5,
+                    "per": -10,
+                    "runes": -5
+                }
+            },
+            "orc": {
+                "stats": {
+                    "hp": 15,
+                    "bd": -5,
+                    "ob1": 5,
+                    "ob2": -5,
+                    "mm": {
+                        "armor": {
+                            "sa": -5,
+                            "c":  -5,
+                            "ce": -5,
+                            "cm": 5,
+                            "co": 5
+                        }
+                    },
+                    "ss1": -10,
+                    "ss2": -10,
+                    "per": -10,
+                    "runes": -10
+                }
+            },
+            "troll": {
+                "stats": {
+                    "hp": 15,
+                    "bd": -10,
+                    "ob1": 15,
+                    "ob2": -10,
+                    "mm": {
+                        "armor": {
+                            "sa": -10,
+                            "c":  -10,
+                            "ce": -10,
+                            "cm": 15,
+                            "co": 15
+                        }
+                    },
+                    "ss1": -10,
+                    "ss2": -15,
+                    "per": -15,
+                    "runes": -15
+                }
+            },
+            "uruk-hai": {
+                "stats": {
+                    "hp": 20,
+                    "bd": 0,
+                    "ob1": 10,
+                    "ob2": 0,
+                    "mm": {
+                        "armor": {
+                            "sa": 0,
+                            "c":  0,
+                            "ce": 0,
+                            "cm": 10,
+                            "co": 10
+                        }
+                    },
+                    "ss1": -10,
+                    "ss2": 0,
+                    "per": -5,
+                    "runes": 0
+                }
+            }
+        },
+        "items": {
+            "shield": { "name": "Escudo"      , "stat": "bd", "bonus":  25 },
+            "sa": { "name": "Sin armadura"    , "stat": "mm", "bonus":   0 },
+            "c" : { "name": "Cuero"           , "stat": "mm", "bonus": -15 },
+            "ce": { "name": "Cuero endurecido", "stat": "mm", "bonus": -30 },
+            "cm": { "name": "Cota de mallas"  , "stat": "mm", "bonus": -45 },
+            "co": { "name": "Coraza"          , "stat": "mm", "bonus": -60 }
         }
     }
 }

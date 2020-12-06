@@ -1,12 +1,13 @@
 <template>
     <input type="checkbox"
-            v-model="disabled"
-            v-if="enable">
-    <label :for="id">{{ title }}</label>
+           :id="id + '-enable'"
+           v-model="disabled"
+           v-if="showEnable">
+    <label :for="id + (showEnable ? '-enable' : '')">{{ title }}</label>
     <select :name="id" :id="id"
             v-model="value"
-            :disabled="disabled">
-        <option value="random">Al azar</option>
+            :disabled="showEnable && !disabled">
+        <option value="random">{{ randomLabel || 'Al azar' }}</option>
         <template v-for="(val, key) of data">
             <option v-if="typeof(val) === 'string'"
                     :value="key">{{ val }}</option>
@@ -24,7 +25,14 @@ import { sample } from '@utils/random.js'
 import { flat } from '@utils/object.js'
 
 export default {
-    props: ['id', 'title', 'data', 'enable', 'disabled', 'modelValue'],
+    props: ['id', 'title', 'randomLabel', 'data', 'showEnable', 'enabled', 'modelValue'],
+
+    data() {
+        return {
+            disabled: this.enabled
+        };
+    },
+
     computed: {
         value: {
             get() {
@@ -35,14 +43,16 @@ export default {
             }
         }
     },
+
     watch: {
         data(newValue) {
             this.flatData = flat(newValue);
         }
     },
+
     methods: {
         getValue() {
-            if (this.enable && !this.enabled) {
+            if (this.showEnable && !this.disabled) {
                 return {};
             }
             const id = this.value === 'random' ? sample(Object.keys(this.flatData)) : this.value;

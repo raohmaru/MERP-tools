@@ -1,18 +1,15 @@
 <template>
     <label :for="id">{{ title }}</label>
     <input type="number" :id="id" :min="min" :max="max"
-            v-model="start"
-            :disabled="isRandom">
+            v-model="start">
     a
     <input type="number" :max="max"
             v-model="end"
             :min="start"
-            :disabled="isRandom">
-    <template v-if="random">
-        <input type="checkbox" :id="id + '-random'"
-                v-model="isRandom">
-        <label :for="id + '-random'" :title="'Genera un número al azar entre ' + min + ' y ' + max">Aleatorio</label>
-    </template>
+            :disabled="!hasRange">
+    <input type="checkbox" :id="id + '-range'"
+            v-model="hasRange">
+    <label :for="id + '-range'" :title="'Genera un número al azar entre ' + min + ' y ' + max">Rango</label>
 </template>
 
 <script>
@@ -24,13 +21,13 @@ export default {
         title: String,
         min: Number,
         max: Number,
-        modelValue: Array,
-        random: Boolean
+        range: Boolean,
+        modelValue: Array
     },
 
     data() {
         return {
-            isRandom: false
+            hasRange: this.range
         };
     },
 
@@ -61,9 +58,8 @@ export default {
 
     methods: {
         getValue() {
-            let r1 = this.isRandom ? this.min : this.start;
-            let r2 = this.isRandom ? this.max : this.end;
-            return randomInt(r1, r2);
+            let r2 = this.hasRange ? this.end : this.start;
+            return randomInt(this.start, r2);
         }
     }
 };

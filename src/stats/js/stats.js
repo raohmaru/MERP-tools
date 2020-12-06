@@ -113,11 +113,19 @@ function draw() {
     ctx.restore();
 }
 
+const fields = ['min', 'max', 'bx', 'by'];
 $('options').addEventListener('change', draw);
 $('options').addEventListener('input', draw);
 $('copy').addEventListener('click', e => {
-    const v = ['min', 'max', 'bx', 'by'].map(id => Number($(id).value));
+    const v = fields.map(id => Number($(id).value));
     navigator.clipboard.writeText(v.join(', '));
+});
+$('paste').addEventListener('input', function(e) {
+    const m = this.value.match(/[\d\-.]+/g);
+    if (m && m.length === 4) {
+        fields.map((id, i) => $(id).value = m[i]);
+        this.value = m.join(', ');
+    }
 });
 
 draw();

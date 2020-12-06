@@ -1,6 +1,6 @@
 <template>
     <label for="npc-name">Nombre</label>
-    <input type="text" name="name" id="npc-name"
+    <input type="text" id="npc-name"
             v-model="name"
             :disabled="random">
     <input type="checkbox" id="npc-name-random"
@@ -45,10 +45,22 @@ const raceLangs = {
 const defaultLang = 'westron';
 
 export default {
+    props: ['modelValue'],
+
     data() {
         return {
-            name: '',
             random: true
+        }
+    },
+
+    computed: {
+        name: {
+            get() {
+                return this.modelValue;
+            },
+            set(value) {
+                this.$emit('update:modelValue', value);
+            }
         }
     },
 
@@ -71,7 +83,7 @@ export default {
                 data = res;
                 nameSetCache[lang] = data;
             }
-            return generateName(data, lang, gender);
+            this.name = generateName(data, lang, gender);
         }
     }
 };
