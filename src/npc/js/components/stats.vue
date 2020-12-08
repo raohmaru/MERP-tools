@@ -2,38 +2,38 @@
     <table>
         <thead>
             <tr>
-                <th>Profesión</th>
-                <th><abbr title="Nivel">#</abbr></th>
-                <th><abbr title="Tipo de armadura (Bonificación defensiva)">TA (BD)</abbr></th>
-                <th><abbr title="Puntos de vida">Pv</abbr></th>
-                <th><abbr title="Puntos de poder">PP</abbr></th>
-                <th><abbr title="Bonificación ofensiva con el arma principal">BO 1ª</abbr></th>
-                <th><abbr title="Bonificación ofensiva con el arma secundaria">BO 2ª</abbr></th>
-                <th><abbr title="Maniobra y movimiento">MM</abbr></th>
-                <th><abbr title="Habilidades generales">HG</abbr></th>
-                <th><abbr title="Acechar y esconderse">Acech. Escond.</abbr></th>
-                <th><abbr title="Abrir cerraduras / Desactivar trampas">Cerrad./Tramp.</abbr></th>
-                <th><abbr title="Percepción">Per.</abbr></th>
-                <th><abbr title="Leer runas">Runas</abbr>/<abbr title="Usar objetos">Usar</abbr></th>
-                <th><abbr title="Bonificación sortilegios base (Cantidad de listas de sortilegios)">Sort. (#)</abbr></th>
-                <th><span title="Bonificación por habilidad de Oficio relacionada">Oficio</span></th>
+                <th>{{ $t('profession') }}</th>
+                <th><abbr :title="$t('level')">#</abbr></th>
+                <th><abbr :title="$t('at_long')">{{ $t('at') }}</abbr></th>
+                <th><abbr :title="$t('hp_long')">{{ $t('hp') }}</abbr></th>
+                <th><abbr :title="$t('pp_long')">{{ $t('pp') }}</abbr></th>
+                <th><abbr :title="$t('ob1_long')">{{ $t('ob1') }}</abbr></th>
+                <th><abbr :title="$t('ob2_long')">{{ $t('ob2') }}</abbr></th>
+                <th><abbr :title="$t('mm_long')">{{ $t('mm') }}</abbr></th>
+                <th><abbr :title="$t('gs_long')">{{ $t('gs') }}</abbr></th>
+                <th><abbr :title="$t('stalkhide_long')">{{ $t('stalkhide') }}</abbr></th>
+                <th><abbr :title="$t('locktrap_long')">{{ $t('locktrap') }}</abbr></th>
+                <th><abbr :title="$t('per_long')">{{ $t('per') }}</abbr></th>
+                <th><abbr :title="$t('runes_long')">{{ $t('runes') }}</abbr>/<abbr :title="$t('use_long')">{{ $t('use') }}</abbr></th>
+                <th><abbr :title="$t('spells_long')">{{ $t('spells') }}</abbr></th>
+                <th><abbr :title="$t('craft_long')">{{ $t('craft') }}</abbr></th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>
-                    {{ npc.value.prof?.label }}
-                    <span v-if="npc.job?.label">/ {{ npc.value.job?.label }}</span>
+                    {{ $t(npc.value.prof || '') }}
+                    <span v-if="npc.value.job">/ {{ $t(`jobs.${npc.value.job}` || '') }}</span>
                 </td>
                 <td>{{ npc.value.level }}</td>
                 <td>
-                    <abbr :title="$root.getItem('armor').name">{{ stats?.armor?.toUpperCase() }}</abbr>
-                    ({{ stats.bd }}<abbr title="Escudo (+25)" v-if="shield.includes('shield')">e</abbr><abbr title="Puede incrementarse por hechizos" v-if="shield.includes('magic')">*</abbr>)
+                    <abbr :title="$t(`armors.${stats.armor}`)">{{ $t(`abbr.${stats.armor}`) }}</abbr>
+                    ({{ stats.bd }}<abbr :title="$t('shield') + ' (+' + $root.getItem('shield').bonus + ')'" v-if="shield.includes('shield')">{{ $t('shield_short') }}</abbr><abbr :title="$t('magicdef_incr')" v-if="shield.includes('magic')">*</abbr>)
                 </td>
                 <td>{{ stats.hp }}</td>
                 <td>{{ stats.pp }}</td>
-                <td>{{ stats.ob1 }}<abbr :title="npc.atk1?.label">{{ npc.value.atk1?.id }}</abbr></td>
-                <td>{{ stats.ob2 }}<abbr :title="npc.atk2?.label">{{ npc.value.atk2?.id }}</abbr></td>
+                <td>{{ stats.ob1 }}<abbr :title="$t(`attacks.${npc.value.atk1}`)">{{ $t(`abbr.${npc.value.atk1}`) }}</abbr></td>
+                <td>{{ stats.ob2 }}<abbr :title="$t(`attacks.${npc.value.atk2}`)">{{ $t(`abbr.${npc.value.atk2}`) }}</abbr></td>
                 <td>{{ stats.mm }}</td>
                 <td>{{ stats.general }}</td>
                 <td>{{ stats.ss1 }}</td>
@@ -90,7 +90,7 @@ export default {
                     v += range * random(-1, 1) * (this.variation / 100);
                 }
 
-                const raceDef = this.defs.value.races[this.npc.value.race.id];
+                const raceDef = this.defs.value.races[this.npc.value.race];
                 if (raceDef) {
                     const raceStat = raceDef.stats[name];
                     if (raceStat && typeof raceStat === 'number') {
@@ -118,7 +118,7 @@ export default {
 
         fill() {
             const perc = this.npc.value.level / this.levelMax;
-            const stats = this.data[this.npc.value.prof.id];
+            const stats = this.data[this.npc.value.prof];
             Object.keys(stats).forEach(n => {
                 this.baseStats[n] = this.getStatValue(n, stats[n]);
                 this.stats[n] = this.baseStats[n];
@@ -135,7 +135,7 @@ export default {
             if (!this.npc.value.race) {
                 return;
             }
-            const raceDef = this.defs.value.races[this.npc.value.race.id];
+            const raceDef = this.defs.value.races[this.npc.value.race];
             this.items.value.forEach(item => {
                 let v = (this.baseStats[item.stat] || 0) + item.bonus;
                 if (raceDef) {
@@ -162,7 +162,7 @@ export default {
 
         resetStat(name) {
             if (this.npc.value.prof) {
-                const v = this.getStatValue(name, this.data[this.npc.value.prof?.id][name]);
+                const v = this.getStatValue(name, this.data[this.npc.value.prof][name]);
                 this.baseStats[name] = v;
                 this.stats[name] = v;
             } else {
@@ -173,7 +173,7 @@ export default {
     },
 
     created() {
-        // watch method of component doesn't seems to work with injected
+        // watch method of component doesn't seems to work with injected data
         watch(this.items, () => {
             this.reset();
             this.applyItems();

@@ -1,11 +1,11 @@
 <template>
-    <label for="npc-name">Nombre</label>
+    <label for="npc-name">{{ $t("name") }}</label>
     <input type="text" id="npc-name"
             v-model="name"
             :disabled="random">
     <input type="checkbox" id="npc-name-random"
             v-model="random">
-    <label for="npc-name-random">Aleatorio</label>
+    <label for="npc-name-random">{{ $t("random") }}</label>
 </template>
 
 <script>
@@ -46,6 +46,7 @@ const defaultLang = 'westron';
 
 export default {
     props: ['modelValue'],
+    emits: ['update:modelValue'],
 
     data() {
         return {

@@ -1,5 +1,5 @@
 /**
- * Flattens an object a single level deep.
+ * Flattens an object to a single level deep.
  * @param {Object} obj 
  * @returns {Object}
  */

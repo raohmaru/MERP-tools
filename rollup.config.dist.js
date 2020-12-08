@@ -8,23 +8,17 @@ const isProd = process.env.NODE_ENV === 'production';
 export default {
 	input: 'src/npc/js/main.js',
 	output: {
-		// file: 'dist/npc/js/app.js',
 		dir: 'dist/npc/js/',
-		// 'es' allows to split chunks
 		format: 'es',
 		sourcemap: isProd ? false : 'inline',
-		sourcemapExcludeSources: true,
-		// Instructs that when importing from 'vue' it should use global variable Vue instead
-		// globals: {
-			// vue: 'Vue'
-		// }
+		sourcemapExcludeSources: true
 	},
 	watch: {
 		clearScreen: false
 	},
 	// Export chunks
 	manualChunks: {
-		vue: ['vue']
+		vue: ['vue', 'vue-i18n']
 	},
 	plugins: [
 		// Allows to import .vue files
@@ -40,7 +34,5 @@ export default {
 		}),
 		// Used to resolve node_modules
 		nodeResolve(),
-	],
-	// Assume these references are to external files
-	// external: ['vue']
+	]
 };

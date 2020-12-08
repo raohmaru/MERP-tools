@@ -3,18 +3,19 @@
            :id="id + '-enable'"
            v-model="disabled"
            v-if="showEnable">
-    <label :for="id + (showEnable ? '-enable' : '')">{{ title }}</label>
+    <label :for="id + (showEnable ? '-enable' : '')">{{ $t(title) }}</label>
     <select :name="id" :id="id"
             v-model="value"
             :disabled="showEnable && !disabled">
-        <option value="random">{{ randomLabel || 'Al azar' }}</option>
+        <option value="random">{{ $t(randomLabel || 'randomly') }}</option>
         <template v-for="(val, key) of data">
             <option v-if="typeof(val) === 'string'"
-                    :value="key">{{ val }}</option>
+                    :value="val">{{ t(val) }}</option>
             <optgroup v-else
-                      :label="key">
-                <option v-for="(v, k) of val"
-                        :value="k">{{ v }}</option>
+                      v-for="(gv, gk) of val"
+                      :label="t(gk)">
+                <option v-for="(v, k) of gv"
+                        :value="v">{{ t(v) }}</option>
             </optgroup>
         </template>
     </select>
@@ -25,7 +26,8 @@ import { sample } from '@utils/random.js'
 import { flat } from '@utils/object.js'
 
 export default {
-    props: ['id', 'title', 'randomLabel', 'data', 'showEnable', 'enabled', 'modelValue'],
+    props: ['id', 'title', 'randomLabel', 'data', 'showEnable', 'enabled', 'group', 'modelValue'],
+    emits: ['update:modelValue'],
 
     data() {
         return {
@@ -33,6 +35,10 @@ export default {
         };
     },
 
+    mounted() {
+        this.localeGroup = this.group ? `${this.group}.` : '';
+    },
+    
     computed: {
         value: {
             get() {
@@ -46,20 +52,21 @@ export default {
 
     watch: {
         data(newValue) {
-            this.flatData = flat(newValue);
+            this.flatData = newValue.flatMap(it => typeof it === 'string' ? it : Object.values(flat(it)));
         }
     },
 
     methods: {
         getValue() {
             if (this.showEnable && !this.disabled) {
-                return {};
+                return null;
             }
-            const id = this.value === 'random' ? sample(Object.keys(this.flatData)) : this.value;
-            return {
-                id,
-                label: this.flatData[id]
-            };
+            const id = this.value === 'random' ? sample(this.flatData) : this.value;
+            return id;
+        },
+
+        t(id) {
+            return this.$i18n.t(this.localeGroup + id);
         }
     }
 };

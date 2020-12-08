@@ -1,53 +1,55 @@
 <template>
+    <LocaleSelector/>
+
     <form action="" @submit.prevent="generate">
         <fieldset>
             <Name ref="name" v-model="name"/>
         </fieldset>
 
         <fieldset>
-            <Combobox ref="gender" id="npc-gender" title="Género"
+            <Combobox ref="gender" id="npc-gender" title="gender"
                         :data="data.genders"
                         v-model="gender"/>
         </fieldset>
         
         <fieldset>
-            <Combobox ref="prof" id="npc-prof" title="Profesión"
+            <Combobox ref="prof" id="npc-prof" title="profession"
                         :data="data.professions"
                         v-model="prof"/>
         </fieldset>
         
         <fieldset>
-            <Combobox ref="job" id="npc-job" title="Oficio" :show-enable="true" :enabled="false"
+            <Combobox ref="job" id="npc-job" title="job" :show-enable="true" :enabled="false" group="jobs"
                         :data="data.jobs"
                         v-model="job"/>
         </fieldset>
         
         <fieldset>
-            <Combobox ref="race" id="npc-race" title="Raza"
+            <Combobox ref="race" id="npc-race" title="culture_race"
                         :data="data.races"
                         v-model="race"/>
         </fieldset>
         
         <fieldset>
-            <RangeNumeric ref="level" id="npc-level" title="Nivel" :min="1" :max="levelMax"
+            <RangeNumeric ref="level" id="npc-level" title="level" :min="1" :max="levelMax"
                     :range="false"
                     v-model="level"/>
         </fieldset>
         
         <fieldset>
-            <Combobox ref="atk1" id="npc-atk1" title="Ataque principal"
+            <Combobox ref="atk1" id="npc-atk1" title="atk1" group="attacks"
                         :data="data.attacks"
                         v-model="atk1"/>
         </fieldset>
         
         <fieldset>
-            <Combobox ref="atk2" id="npc-atk2" title="Ataque secundario"
+            <Combobox ref="atk2" id="npc-atk2" title="atk2" group="attacks"
                         :data="data.attacks"
                         v-model="atk2"/>
         </fieldset>
         
         <fieldset>
-            <Combobox ref="armor" id="npc-armor" title="Armadura" random-label="Profesional"
+            <Combobox ref="armor" id="npc-armor" title="armor" random-label="professional" group="armors"
                         :data="data.armor"
                         v-model="armor"/>
         </fieldset>
@@ -55,24 +57,24 @@
         <fieldset>
             <input type="checkbox" value="shield" id="npc-shield"
                     v-model="shield">
-            <label for="npc-shield">Escudo</label>
+            <label for="npc-shield">{{ $t('shield') }}</label>
             <input type="checkbox" value="magic" id="npc-magicdef"
                     v-model="shield">
-            <label for="npc-magicdef">Defensa mágica</label>
+            <label for="npc-magicdef">{{ $t('magicdef') }}</label>
         </fieldset>
         
         <fieldset>
-            <Slider ref="variation" id="npc-variation" title="Variación"
+            <Slider ref="variation" id="npc-variation" title="variation"
                     :min="0" :max="100" :step="1"
                     v-model="variation"/>
         </fieldset>
 
-        <input type="submit" value="Generar"> <!-- <input type="number" name="qty"> -->
+        <input type="submit" :value="$t('generate')"> <!-- <input type="number" name="qty"> -->
     </form>
 
     <article>
         <p class="center">
-            <strong>{{ name }}</strong> ({{ npc.race?.label }}<span v-if="npc.gender?.id !== 'nd'">, {{ npc.gender?.label }}</span>)
+            <strong>{{ name }}</strong> ({{ $t(npc.race || '') }}<span v-if="npc.gender !== 'not-defined'">, {{ $t(npc.gender || '') }}</span>)
         </p>
         
         <section>
@@ -81,34 +83,36 @@
         </section>
         
         <section>
-            Rasgos de interpretación
+            {{ $t('role_traits') }}
             <ul>
-                <li>Personalidad</li>
-                <li>Motivación</li>
+                <li>{{ $t('demeanor') }}</li>
+                <li>{{ $t('personality') }}</li>
+                <li>{{ $t('motivation') }}</li>
                 <!-- https://en.wikipedia.org/wiki/Alignment_(Dungeons_%26_Dragons) -->
-                <li>Alineamiento</li>
+                <li>{{ $t('alignment') }}</li>
             </ul>
         </section>
     
         <section>
-            Conducta
+            {{ $t('demeanor') }}
             <ul>
-                <li>Alineamiento: +0</li>
-                <li>Honestidad: +0</li>
-                <li>Dominante: +0</li>
+                <!-- Based on a lecture by Chris Crawford -->
+                <li>{{ $t('goodness') }}: +0</li>
+                <li>{{ $t('honest') }}: +0</li>
+                <li>{{ $t('dominant') }}: +0</li>
             </ul>
         </section>
     
         <section>
             <!-- https://springhole.net/writing_roleplaying_randomators/basic-character-appearance.htm -->
-            Apariencia física
+            {{ $t('phys_appearance') }}
             <ul>
-                <li>Piel</li>
-                <li>Cabello</li>
-                <li>Ojos</li>
-                <li>Altura</li>
-                <li>Peso</li>
-                <li>Complexión</li>
+                <li>{{ $t('skin') }}</li>
+                <li>{{ $t('hair') }}</li>
+                <li>{{ $t('eyes') }}</li>
+                <li>{{ $t('height') }}</li>
+                <li>{{ $t('weight') }}</li>
+                <li>{{ $t('build') }}</li>
             </ul>
         </section>
     </article>
@@ -189,7 +193,7 @@ export default {
                 level: comps.level.getValue()
             };
             comps.stats.fill();
-            comps.name.generateName(this.npc.race.id, this.npc.gender.id);
+            comps.name.generateName(this.npc.race, this.npc.gender);
             this.applyItem('armor', this.armor);
         },
 
