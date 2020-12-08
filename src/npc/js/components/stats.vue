@@ -22,18 +22,18 @@
         <tbody>
             <tr>
                 <td>
-                    {{ npc.prof?.label }}
-                    <span v-if="npc.job?.label">/ {{ npc.job?.label }}</span>
+                    {{ npc.value.prof?.label }}
+                    <span v-if="npc.job?.label">/ {{ npc.value.job?.label }}</span>
                 </td>
-                <td>{{ npc.level }}</td>
+                <td>{{ npc.value.level }}</td>
                 <td>
                     <abbr :title="$root.getItem('armor').name">{{ stats?.armor?.toUpperCase() }}</abbr>
                     ({{ stats.bd }}<abbr title="Escudo (+25)" v-if="shield.includes('shield')">e</abbr><abbr title="Puede incrementarse por hechizos" v-if="shield.includes('magic')">*</abbr>)
                 </td>
                 <td>{{ stats.hp }}</td>
                 <td>{{ stats.pp }}</td>
-                <td>{{ stats.ob1 }}<abbr :title="npc.atk1?.label">{{ npc.atk1?.id }}</abbr></td>
-                <td>{{ stats.ob2 }}<abbr :title="npc.atk2?.label">{{ npc.atk2?.id }}</abbr></td>
+                <td>{{ stats.ob1 }}<abbr :title="npc.atk1?.label">{{ npc.value.atk1?.id }}</abbr></td>
+                <td>{{ stats.ob2 }}<abbr :title="npc.atk2?.label">{{ npc.value.atk2?.id }}</abbr></td>
                 <td>{{ stats.mm }}</td>
                 <td>{{ stats.general }}</td>
                 <td>{{ stats.ss1 }}</td>
@@ -60,13 +60,12 @@ function bezier(t, points) {
 export default {
     data() {
         return {
-            npc: {},
             stats: {},
             baseStats: {}
         }
     },
     props: ['data', 'levelMax', 'variation', 'shield'],
-    inject: ['items', 'defs'],
+    inject: ['items', 'defs', 'npc'],
     methods: {
         /**
          * @param {String} name
@@ -84,14 +83,14 @@ export default {
                         x: [0, stat[2], 1],
                         y: [0, stat[3], 1]
                     };
-                    v = bezier(this.npc.level / this.levelMax, points) * range + stat[0];
+                    v = bezier(this.npc.value.level / this.levelMax, points) * range + stat[0];
                 }
 
                 if (this.variation) {
                     v += range * random(-1, 1) * (this.variation / 100);
                 }
 
-                const raceDef = this.defs.value.races[this.npc.race.id];
+                const raceDef = this.defs.value.races[this.npc.value.race.id];
                 if (raceDef) {
                     const raceStat = raceDef.stats[name];
                     if (raceStat && typeof raceStat === 'number') {
@@ -108,7 +107,7 @@ export default {
             } else {
                 let v;
                 for (const [key, value] of Object.entries(stat)) {
-                    if (key > this.npc.level) {
+                    if (key > this.npc.value.level) {
                         break;
                     }
                     v = value;
@@ -117,10 +116,9 @@ export default {
             }
         },
 
-        fill(npc) {
-            this.npc = npc;
-            const perc = npc.level / this.levelMax;
-            const stats = this.data[npc.prof.id];
+        fill() {
+            const perc = this.npc.value.level / this.levelMax;
+            const stats = this.data[this.npc.value.prof.id];
             Object.keys(stats).forEach(n => {
                 this.baseStats[n] = this.getStatValue(n, stats[n]);
                 this.stats[n] = this.baseStats[n];
@@ -134,10 +132,10 @@ export default {
         },
 
         applyItems() {
-            if (!this.npc.race) {
+            if (!this.npc.value.race) {
                 return;
             }
-            const raceDef = this.defs.value.races[this.npc.race.id];
+            const raceDef = this.defs.value.races[this.npc.value.race.id];
             this.items.value.forEach(item => {
                 let v = (this.baseStats[item.stat] || 0) + item.bonus;
                 if (raceDef) {
@@ -163,12 +161,19 @@ export default {
         },
 
         resetStat(name) {
-            this.baseStats[name] = this.getStatValue(name, this.data[this.npc.prof.id][name]);
-            this.stats[name] = this.baseStats[name];
+            if (this.npc.value.prof) {
+                const v = this.getStatValue(name, this.data[this.npc.value.prof?.id][name]);
+                this.baseStats[name] = v;
+                this.stats[name] = v;
+            } else {
+                delete this.baseStats[name];
+                delete this.stats[name];
+            }
         }
     },
 
     created() {
+        // watch method of component doesn't seems to work with injected
         watch(this.items, () => {
             this.reset();
             this.applyItems();

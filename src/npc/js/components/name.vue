@@ -65,7 +65,7 @@ export default {
     },
 
     methods: {
-        async getName(race, gender) {
+        async generateName(race, gender) {
             if (!this.random) {
                 return this.name;
             }
