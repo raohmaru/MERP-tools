@@ -1,18 +1,15 @@
-import Ease from '../../js/libs/paprika/easing/index.js'
+import Ease from '../../js/libs/paprika/easing/index.js';
+import { bezier3 } from '../../js/utils/math.js';
 
-// https://javascript.info/bezier-curve
-function bezier3(t, x1, x2, x3) {
-    return ((1 - t) ** 2) * x1 + 2 * (1 - t) * t * x2 + t ** 2 * x3;
-}
 const easing = {
     bezier(t) {
         const x = bezier3(t, ...points.x);
         return bezier3(x, ...points.y);
     },
 };
-const $ = (id) => document.getElementById(id);
+const $ = (id) => id[0] === '#' ? document.getElementById(id.substr(1)) : document.querySelectorAll(id);
 
-const canvas = $('stage');
+const canvas = $('#stage');
 const ctx = stage.getContext('2d');
 const offset = 20;
 const len = 20;
@@ -22,12 +19,18 @@ const points = {
     x: [0, 0.56, 1],
     y: [0, 0.999, 1]
 };
+const fields = Array.from($('input[type="number"]'));
+let pauseDraw = false;
 
 function draw() {
+    if (pauseDraw) {
+        return;
+    }
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    points.x[1] = parseFloat($('bx').value);
-    points.y[1] = parseFloat($('by').value);
+    points.x[1] = parseFloat($('#bx').value);
+    points.y[1] = parseFloat($('#by').value);
 
     // Draw X Y axis
     ctx.strokeStyle = '#99f';
@@ -40,15 +43,15 @@ function draw() {
     ctx.stroke();
 
     let easingFunc;
-    const ease = $('easing').value.split('.');
+    const ease = $('#easing').value.split('.');
     if (Ease[ease[0]]) {
         easingFunc = Ease[ease[0]][ease[1]];
     } else {
         easingFunc = easing[ease[0]];
     }
 
-    const min = parseInt($('min').value);
-    const max = parseInt($('max').value);
+    const min = parseInt($('#min').value);
+    const max = parseInt($('#max').value);
     let x, y, px, py, v, m;
 
     ctx.save();
@@ -113,18 +116,27 @@ function draw() {
     ctx.restore();
 }
 
-const fields = ['min', 'max', 'bx', 'by'];
-$('options').addEventListener('change', draw);
-$('options').addEventListener('input', draw);
-$('copy').addEventListener('click', e => {
-    const v = fields.map(id => Number($(id).value));
-    navigator.clipboard.writeText(v.join(', '));
+$('#options').addEventListener('change', draw);
+$('#options').addEventListener('input', (e) => {
+    $('#paste').value = fields.map(el => Number(el.value)).join(', ');
+    draw();
 });
-$('paste').addEventListener('input', function(e) {
+$('#copy').addEventListener('click', e => {
+    const v = fields.map(el => Number(el.value));
+    navigator.clipboard.writeText(v.join(', '));
+    $('#paste').focus();
+    $('#paste').setSelectionRange(0, -1);
+});
+$('#paste').addEventListener('input', function(e) {
     const m = this.value.match(/[\d\-.]+/g);
     if (m && m.length === 4) {
-        fields.map((id, i) => $(id).value = m[i]);
+        pauseDraw = true;
+        fields.map((el, i) => el.value = m[i]);
         this.value = m.join(', ');
+        window.requestIdleCallback(() => {
+            pauseDraw = false;
+            draw();
+        });
     }
 });
 
