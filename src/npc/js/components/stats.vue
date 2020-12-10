@@ -28,7 +28,7 @@
                 <td>{{ npc.value.level }}</td>
                 <td>
                     <abbr :title="$t(`armors.${stats.armor}`)">{{ $t(`abbr.${stats.armor}`) }}</abbr>
-                    ({{ stats.bd }}<abbr :title="$t('shield') + ' (+' + $root.getItem('shield').bonus + ')'" v-if="shield.includes('shield')">{{ $t('shield_short') }}</abbr><abbr :title="$t('magicdef_incr')" v-if="shield.includes('magic')">*</abbr>)
+                    ({{ stats.bd }}<abbr :title="$t('shield') + ' (+' + $items.get('shield').bonus + ')'" v-if="shield.includes('shield')">{{ $t('shield_short') }}</abbr><abbr :title="$t('magicdef_incr')" v-if="shield.includes('magic')">*</abbr>)
                 </td>
                 <td>{{ stats.hp }}</td>
                 <td>{{ stats.pp }}</td>
@@ -65,7 +65,7 @@ export default {
         }
     },
     props: ['data', 'levelMax', 'variation', 'shield'],
-    inject: ['items', 'defs', 'npc'],
+    inject: ['defs', 'npc'],
     methods: {
         /**
          * @param {String} name
@@ -73,7 +73,7 @@ export default {
          */
         getStatValue(name, stat) {
             if (stat instanceof Array) {
-                // stat = [min, max, px, py]
+                // stat = [min, max, px, py, cap]
                 const range = stat[1] - stat[0];
                 let v;
                 if (stat.length <= 2) {
@@ -90,9 +90,9 @@ export default {
                     v += range * random(-1, 1) * (this.variation / 100);
                 }
 
-                const raceDef = this.defs.value.races[this.npc.value.race];
-                if (raceDef) {
-                    const raceStat = raceDef.stats[name];
+                const raceStats = this.defs.value.races[this.npc.value.race];
+                if (raceStats) {
+                    const raceStat = raceStats.stats[name];
                     if (raceStat && typeof raceStat === 'number') {
                         v += raceStat;
                     }
@@ -120,14 +120,9 @@ export default {
             const perc = this.npc.value.level / this.levelMax;
             const stats = this.data[this.npc.value.prof];
             Object.keys(stats).forEach(n => {
-                this.baseStats[n] = this.getStatValue(n, stats[n]);
-                this.stats[n] = this.baseStats[n];
-            });
-        },
-
-        reset() {
-            Object.keys(this.stats).forEach(n => {
-                this.stats[n] = this.baseStats[n] || 0;
+                let v = this.getStatValue(n, stats[n]);
+                this.baseStats[n] = v;
+                this.stats[n] = v;
             });
         },
 
@@ -135,15 +130,21 @@ export default {
             if (!this.npc.value.race) {
                 return;
             }
-            const raceDef = this.defs.value.races[this.npc.value.race];
-            this.items.value.forEach(item => {
+            const raceStats = this.defs.value.races[this.npc.value.race];
+            const profStats = this.defs.value.professions[this.npc.value.prof].stats;
+            this.$items.getAll().forEach(item => {
                 let v = (this.baseStats[item.stat] || 0) + item.bonus;
-                if (raceDef) {
-                    const raceStat = raceDef.stats[item.stat];
+                if (raceStats) {
+                    const raceStat = raceStats.stats[item.stat];
                     if (raceStat && typeof raceStat !== 'number') {
                         for (const [key, value] of Object.entries(raceStat)) {
                             v += value[this.baseStats[key]];
                         }
+                    }
+                }
+                if (profStats[item.stat]) {
+                    for (const [key, value] of Object.entries(profStats[item.stat])) {
+                        v += value[this.baseStats[key]];
                     }
                 }
                 this.stats[item.stat] = v;
@@ -174,8 +175,8 @@ export default {
 
     created() {
         // watch method of component doesn't seems to work with injected data
-        watch(this.items, () => {
-            this.reset();
+        watch(this.$items.items, (newValue, oldValue) => {
+            oldValue.forEach(item => this.stats[item.stat] = this.baseStats[item.stat] || 0)
             this.applyItems();
         });
     }

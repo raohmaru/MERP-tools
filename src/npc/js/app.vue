@@ -69,7 +69,7 @@
                     v-model="variation"/>
         </fieldset>
 
-        <input type="submit" :value="$t('generate')"> <!-- <input type="number" name="qty"> -->
+        <input type="submit" :value="$t('generate')">
     </form>
 
     <article>
@@ -79,13 +79,12 @@
         
         <section>
             <Stats ref="stats" :data="data.stats" :level-max="levelMax"
-                    :variation="variation" :shield="shield"/>
+                   :variation="variation" :shield="shield"/>
         </section>
         
         <section>
             {{ $t('role_traits') }}
             <ul>
-                <li>{{ $t('demeanor') }}</li>
                 <li>{{ $t('personality') }}</li>
                 <li>{{ $t('motivation') }}</li>
                 <!-- https://en.wikipedia.org/wiki/Alignment_(Dungeons_%26_Dragons) -->
@@ -130,19 +129,16 @@ export default {
             data: {},
             name: '',
             gender: 'random',
-            genderLabel: '',
-            prof: 'warrior',
+            prof: 'random',
             job: 'random',
-            race: 'beorning',
-            raceLabel: '',
+            race: 'random',
             atk1: 'random',
             atk2: 'random',
             armor: 'random',
             level: [1, 10],
             levelMax: 20,
             shield: [],
-            variation: 0,
-            items: [],
+            variation: 5,
             npc: {}
         };
     },
@@ -150,7 +146,6 @@ export default {
     provide() {
         return {
             // Data available for components and makes them reactive
-            items: computed(() => this.items),
             defs: computed(() => this.data.defs),
             npc: computed(() => this.npc)
         }
@@ -163,9 +158,9 @@ export default {
     watch: {
         shield(newValue, oldValue) {
             if (newValue.includes('shield') && !oldValue.includes('shield')) {
-                this.addItem('shield');
+                this.$items.add('shield');
             } else if (!newValue.includes('shield') && oldValue.includes('shield')) {
-                this.removeItem('shield');
+                this.$items.remove('shield');
             }
         },
 
@@ -179,6 +174,7 @@ export default {
             const data = await fetch('data/npc.json');
             const res = await data.json();
             this.data = Object.assign({}, res);
+            this.$items.setup(this.data.defs.items);
         },
 
         async generate() {
@@ -204,30 +200,8 @@ export default {
             } else {
                 stats.resetStat(id);
             }
-            this.removeItem(id);
-            this.addItem(id, stats.getStat(id));
-        },
-
-        addItem(id, model) {
-            const item = this.data.defs.items[model || id];
-            // Injected properties does now triggers a change unless they are replaced
-            this.items = [...this.items, {
-                ...item,
-                id
-            }];
-        },
-
-        removeItem(id) {
-            this.items = this.items.filter(it => it.id !== id);
-        },
-
-        getItem(id) {
-            for (let i = 0; i < this.items.length; i++) {
-                if (this.items[i].id === id) {
-                    return this.items[i];
-                }
-            }
-            return {};
+            this.$items.remove(id);
+            this.$items.add(id, stats.getStat(id));
         }
     }
 };
