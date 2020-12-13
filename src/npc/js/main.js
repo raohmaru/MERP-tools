@@ -4,7 +4,8 @@ import App from './app.vue'
 import Items from './plugins/items.js'
 
 const i18n = new createI18n({
-    locale: 'es',
+    locale: 'en',
+    fallbackLocale: 'en',
     messages: {
         en: {
             _name_: 'English'

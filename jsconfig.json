@@ -6,6 +6,6 @@
     "include": ["src/**/*"],
     "baseUrl": ".",
     "paths": {
-      "@utils/*": ["./src/js/utils/*"]
+      "@utils/*": ["src/js/utils/*"]
     }
   }

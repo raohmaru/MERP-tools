@@ -33,6 +33,10 @@ function getAll() {
     return items.value;
 }
 
+function getRef() {
+    return items;
+}
+
 export default {
     install: (app, options) => {
         app.config.globalProperties.$items = {
@@ -41,7 +45,7 @@ export default {
             remove,
             get,
             getAll,
-            items
+            getRef
         };
     }
 }

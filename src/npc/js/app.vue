@@ -19,9 +19,9 @@
         </fieldset>
         
         <fieldset>
-            <Combobox ref="job" id="npc-job" title="job" :show-enable="true" :enabled="false" group="jobs"
-                        :data="data.jobs"
-                        v-model="job"/>
+            <Combobox ref="job" id="npc-job" title="job" :show-enable="true" :enabled="false" :sort="true"
+                      :data="data.jobs"
+                      v-model="job"/>
         </fieldset>
         
         <fieldset>
@@ -37,13 +37,13 @@
         </fieldset>
         
         <fieldset>
-            <Combobox ref="atk1" id="npc-atk1" title="atk1" group="attacks"
+            <Combobox ref="atk1" id="npc-atk1" title="atk1" group="attacks" :sort="true"
                         :data="data.attacks"
                         v-model="atk1"/>
         </fieldset>
         
         <fieldset>
-            <Combobox ref="atk2" id="npc-atk2" title="atk2" group="attacks"
+            <Combobox ref="atk2" id="npc-atk2" title="atk2" group="attacks" :sort="true"
                         :data="data.attacks"
                         v-model="atk2"/>
         </fieldset>
@@ -84,12 +84,7 @@
         
         <section>
             {{ $t('role_traits') }}
-            <ul>
-                <li>{{ $t('personality') }}</li>
-                <li>{{ $t('motivation') }}</li>
-                <!-- https://en.wikipedia.org/wiki/Alignment_(Dungeons_%26_Dragons) -->
-                <li>{{ $t('alignment') }}</li>
-            </ul>
+            <RoleTraits ref="roletraits" amount="3" :data="data.traits"/>
         </section>
     
         <section>
@@ -97,7 +92,7 @@
             <ul>
                 <!-- Based on a lecture by Chris Crawford -->
                 <li>{{ $t('goodness') }}: +0</li>
-                <li>{{ $t('honest') }}: +0</li>
+                <li>{{ $t('honesty') }}: +0</li>
                 <li>{{ $t('dominant') }}: +0</li>
             </ul>
         </section>
@@ -190,6 +185,7 @@ export default {
             };
             comps.stats.fill();
             comps.name.generateName(this.npc.race, this.npc.gender);
+            comps.roletraits.generate();
             this.applyItem('armor', this.armor);
         },
 

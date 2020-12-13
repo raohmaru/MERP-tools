@@ -23,7 +23,7 @@
             <tr>
                 <td>
                     {{ $t(npc.value.prof || '') }}
-                    <span v-if="npc.value.job">/ {{ $t(`jobs.${npc.value.job}` || '') }}</span>
+                    <span v-if="npc.value.job">/ {{ $t(`${npc.value.job}` || '') }}</span>
                 </td>
                 <td>{{ npc.value.level }}</td>
                 <td>
@@ -62,7 +62,7 @@ export default {
         return {
             stats: {},
             baseStats: {}
-        }
+        };
     },
     props: ['data', 'levelMax', 'variation', 'shield'],
     inject: ['defs', 'npc'],
@@ -175,7 +175,7 @@ export default {
 
     created() {
         // watch method of component doesn't seems to work with injected data
-        watch(this.$items.items, (newValue, oldValue) => {
+        watch(this.$items.getRef(), (newValue, oldValue) => {
             oldValue.forEach(item => this.stats[item.stat] = this.baseStats[item.stat] || 0)
             this.applyItems();
         });

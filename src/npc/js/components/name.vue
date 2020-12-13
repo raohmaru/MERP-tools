@@ -20,7 +20,7 @@ const raceLangs = {
     'noldor': 'quenya',
     'silvan': 'sindarin',
     'sindar': 'sindarin',
-    'half-elven': 'quenya',
+    'half-elf': 'quenya',
     'dunadan': 'sindarin',
     'beorning': 'atliduk',
     'corsair': 'adunaic',
@@ -51,7 +51,7 @@ export default {
     data() {
         return {
             random: true
-        }
+        };
     },
 
     computed: {
