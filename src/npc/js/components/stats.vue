@@ -27,13 +27,15 @@
                 </td>
                 <td>{{ npc.value.level }}</td>
                 <td>
-                    <abbr :title="$t(`armors.${stats.armor}`)">{{ $t(`abbr.${stats.armor}`) }}</abbr>
-                    ({{ stats.bd }}<abbr :title="$t('shield') + ' (+' + $items.get('shield').bonus + ')'" v-if="shield.includes('shield')">{{ $t('shield_short') }}</abbr><abbr :title="$t('magicdef_incr')" v-if="shield.includes('magic')">*</abbr>)
+                    <template v-if="stats.armor">
+                        <abbr :title="$t(`armors.${stats.armor}`)">{{ $t(`abbr.${stats.armor}`) }}</abbr>
+                        ({{ stats.bd }}<abbr :title="$t('shield') + ' (+' + $items.get('shield').bonus + ')'" v-if="shield.includes('shield')">{{ $t('shield_short') }}</abbr><abbr :title="$t('magicdef_incr')" v-if="shield.includes('magic')">*</abbr>)
+                    </template>
                 </td>
                 <td>{{ stats.hp }}</td>
                 <td>{{ stats.pp }}</td>
-                <td>{{ stats.ob1 }}<abbr :title="$t(`attacks.${npc.value.atk1}`)">{{ $t(`abbr.${npc.value.atk1}`) }}</abbr></td>
-                <td>{{ stats.ob2 }}<abbr :title="$t(`attacks.${npc.value.atk2}`)">{{ $t(`abbr.${npc.value.atk2}`) }}</abbr></td>
+                <td>{{ stats.ob1 }}<abbr v-if="npc.value.atk1" :title="$t(`attacks.${npc.value.atk1}`)">{{ $t(`abbr.${npc.value.atk1}`) }}</abbr></td>
+                <td>{{ stats.ob2 }}<abbr v-if="npc.value.atk2" :title="$t(`attacks.${npc.value.atk2}`)">{{ $t(`abbr.${npc.value.atk2}`) }}</abbr></td>
                 <td>{{ stats.mm }}</td>
                 <td>{{ stats.general }}</td>
                 <td>{{ stats.ss1 }}</td>
