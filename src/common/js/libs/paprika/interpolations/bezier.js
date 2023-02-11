@@ -1,3 +1,5 @@
+const POW = Math.pow;
+
 function factorial() {
 	const a = [1];
 	return function (n) {
@@ -20,10 +22,9 @@ function bernstein(n, i) {
 
 export function Bezier(v, k) {
 	let b = 0;
-	const n = v.length - 1,
-		pw = Math.pow;
+	const n = v.length - 1;
 	for (let i = 0; i <= n; i++) {
-		b += pw(1 - k, n - i) * pw(k, i) * v[i] * bernstein(n, i);
+		b += POW(1 - k, n - i) * POW(k, i) * v[i] * bernstein(n, i);
 	}
 	return b;
 }

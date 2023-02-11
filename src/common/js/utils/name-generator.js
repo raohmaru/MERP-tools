@@ -1,8 +1,8 @@
 // https://www.fantasynamegenerators.com/lord-of-the-rings.php
 // https://eldamo.org/content/languages/index.html
 
-import createChain from './markov-chain.js';
-import { createString, applyRule } from './markov-string.js';
+import createChain from '../libs/markov-chain/markov-chain.js';
+import { createString, applyRule } from '../libs/markov-chain/markov-string.js';
 
 const chainCache = {};
 

@@ -1,38 +1,17 @@
+<!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stats 🍃 MERP Tools</title>
-    <style>
-        body {
-            background-color: #666;
-        }
-
-        #stage {
-            background-color: #000;
-        }
-
-        #options {
-            display: flex;
-            align-items: start;
-            margin-top: 0.5em;
-        }
-
-        input[type="number"] {
-            width: 60px;
-        }
-
-        .numbers {
-            margin-left: 0.3em;
-        }
-    </style>
+    <link rel="stylesheet" href="css/stats.css">
 </head>
 
 <body>
+    <h1>Level-based Progression</h1>
     <canvas id="stage" width="600" height="400"></canvas>
     <div id="options">
-        <select id="easing" multiple size=16>
+        <select id="easing" size=16>
             <option value="Linear.None">Linear</option>
             <option value="Sinusoidal.In">Sinusoidal.In</option>
             <option value="Quadratic.In">Quadratic.In</option>
@@ -59,6 +38,10 @@
             <input type="text" id="paste">
         </div>
     </div>
+
+    <footer>
+        &copy; 2023 La Tierra de Mierda
+    </footer>
 
     <script src="js/stats.js" type="module"></script>
 </body>

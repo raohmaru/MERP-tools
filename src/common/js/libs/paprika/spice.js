@@ -21,19 +21,19 @@ export default function Spice(options) {
 }
 
 Spice.prototype = Object.assign(Object.create(Object.prototype), {
-	start: function(time) {
+	start(time) {
 		this.startTime = time || window.performance.now();
 		this.startTime += this.delay;
 		this._valuesStart = Object.assign(Object.create(null), this.from);
 		return this;
 	},
 
-	end: function() {
+	end() {
 		this.update(this.startTime + this.duration);
 		return this;
 	},
 
-	update: function(time) {
+	update(time) {
 		time = time || window.performance.now();
 		if (time < this.startTime) {
 			return true;
@@ -68,7 +68,7 @@ Spice.prototype = Object.assign(Object.create(Object.prototype), {
 		return true;
 	},
 
-	dispose: function() {
+	dispose() {
 		this.from = null;
 		this.to = null;
 		this.onUpdate = null;

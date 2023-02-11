@@ -2,14 +2,12 @@ import alias from '@rollup/plugin-alias';
 const replace = require('@rollup/plugin-replace');
 const vue = require('rollup-plugin-vue');
 
-const isProd = process.env.NODE_ENV === 'production';
-
 export default {
 	input: 'src/npc/js/main.js',
 	output: {
-		file: 'dist/npc/js/main.js',
+		file: 'dev/npc/js/main.js',
 		format: 'iife',
-		sourcemap: isProd ? false : 'inline',
+		sourcemap: 'inline',
 		sourcemapExcludeSources: true,
 		// Instructs that when importing from 'vue' it should use global variable Vue instead
 		globals: {
@@ -29,7 +27,7 @@ export default {
 		}),
 		alias({
 			entries: [
-				{ find: '@utils', replacement: './src/js/utils' }
+				{ find: '@utils', replacement: './src/common/js/utils' }
 			]
 		})
 	],

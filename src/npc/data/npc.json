@@ -835,6 +835,7 @@
             ],
             "terms": {
                 "thing": [
+                    "the evil",
                     "<race>",
                     "<place>",
                     "<faction>",

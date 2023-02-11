@@ -1,9 +1,7 @@
 import { isVowel, toClusters, rulesPreset } from './lang.js';
 
-/**
- * Name generator using markov chains.
- * Inspired by https://donjon.bin.sh/code/name/
- */
+// Name generator using markov chains.
+// Inspired by https://donjon.bin.sh/code/name/
 
 /**
  * Adds a new token to the chain and updates its weight.

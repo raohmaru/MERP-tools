@@ -1,5 +1,5 @@
 import { toClusters } from './lang.js';
-import { sample } from './random.js';
+import { sample } from '../../utils/random.js';
 
 const WEIGHT_SCALE = 1.3;
 

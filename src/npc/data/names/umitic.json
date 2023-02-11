@@ -22,10 +22,12 @@
         }
     ],
     "list": [
+		"Aghan",
         "Aluenda",
         "Ancanli",
         "Bais",
         "Dumalir",
+		"Ghan",
         "Hust",
         "Ikus",
         "Khazi",
@@ -46,6 +48,8 @@
         "Ulas",
         "Unkus",
         "Urai",
+		"buri",
+		"gorgun",
         "lati",
         "umlati"
     ]

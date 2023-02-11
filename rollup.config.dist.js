@@ -3,18 +3,12 @@ import alias from '@rollup/plugin-alias';
 const replace = require('@rollup/plugin-replace');
 const vue = require('rollup-plugin-vue');
 
-const isProd = process.env.NODE_ENV === 'production';
-
 export default {
 	input: 'src/npc/js/main.js',
 	output: {
 		dir: 'dist/npc/js/',
 		format: 'es',
-		sourcemap: isProd ? false : 'inline',
-		sourcemapExcludeSources: true
-	},
-	watch: {
-		clearScreen: false
+		sourcemap: false
 	},
 	// Export chunks
 	manualChunks: {
@@ -29,10 +23,10 @@ export default {
 		}),
 		alias({
 			entries: [
-				{ find: '@utils', replacement: './src/js/utils' }
+				{ find: '@utils', replacement: './src/common/js/utils' }
 			]
 		}),
 		// Used to resolve node_modules
-		nodeResolve(),
+		nodeResolve()
 	]
 };

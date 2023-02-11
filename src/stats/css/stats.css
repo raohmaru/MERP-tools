@@ -1,0 +1,26 @@
+@import '../../common/css/normalize.css';
+
+body {
+    margin: 1em;
+    background-color: #666;
+    font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif;
+    color: #fff;
+}
+
+#stage {
+    background-color: #000;
+}
+
+#options {
+    display: flex;
+    align-items: start;
+    margin-top: 0.5em;
+}
+
+input[type="number"] {
+    width: 60px;
+}
+
+.numbers {
+    margin-left: 0.3em;
+}

@@ -1,3 +1,5 @@
+const FLOOR = Math.floor;
+
 function linear(p0, p1, t) {
 	return (p1 - p0) * t + p0;
 }
@@ -5,7 +7,7 @@ function linear(p0, p1, t) {
 export function Linear(v, k) {
 	const m = v.length - 1,
 		f = m * k,
-		i = Math.floor(f);
+		i = FLOOR(f);
 	if (k < 0) {
 		return linear(v[0], v[1], f);
 	}

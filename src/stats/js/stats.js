@@ -1,5 +1,6 @@
-import Ease from '../../js/libs/paprika/easing/index.js';
-import { bezier3 } from '../../js/utils/math.js';
+import Ease from '../../common/js/libs/paprika/easing/index.js';
+import { bezier3 } from '../../common/js/utils/math.js';
+import { $ } from '../../common/js/utils/dom.js';
 
 const easing = {
     bezier(t) {
@@ -7,7 +8,6 @@ const easing = {
         return bezier3(x, ...points.y);
     },
 };
-const $ = (id) => id[0] === '#' ? document.getElementById(id.substr(1)) : document.querySelectorAll(id);
 
 const canvas = $('#stage');
 const ctx = stage.getContext('2d');

@@ -7,15 +7,15 @@ export default function Recipe(onComplete) {
 }
 
 Recipe.prototype = Object.assign(Object.create(Object.prototype), {
-	add: function(spice) {
+	add(spice) {
 		this._spices.push(spice);
 	},
 
-	start: function() {
+	start() {
 		this._spices[0].start();
 	},
 
-	update: function(time) {
+	update(time) {
 		if (!this._spices.length) {
 			return false;
 		}
@@ -33,7 +33,7 @@ Recipe.prototype = Object.assign(Object.create(Object.prototype), {
 		return true;
 	},
 
-	dispose: function() {
+	dispose() {
 		for (let i = 0, len = this._spices.length; i < len; i++) {
 			this._spices[i].dispose();
 		}

@@ -1,10 +1,19 @@
+const MIN = Math.min;
+const FLOOR = Math.floor;
+const RND = Math.random;
+
 /**
  * Produce a random sample from the array.
  * @param {Array} arr
- * @returns {*}
+ * @returns {*[]}
  */
-export function sample(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+export function sample(arr, qty = 1) {
+	const newArr = [];
+	const cloneArr = [...arr];
+	for(let i = 0, len = MIN(qty, arr.length); i < len; i++) {
+		newArr.push(...cloneArr.splice(FLOOR(RND() * cloneArr.length), 1));
+	}
+    return qty === 1 ? newArr[0] : newArr;
 }
 
 /**
@@ -16,12 +25,12 @@ export function sample(arr) {
 export function random(min, max) {
 	if(!max) {
 		if(!min) {
-			return Math.random();
+			return RND();
 		}
 		max = min;
 		min = 0;
 	}
-	return Math.random()*(max-min) + min;
+	return RND() * (max - min) + min;
 }
 
 /**
@@ -31,5 +40,5 @@ export function random(min, max) {
  * @returns {Number} - Integer number
  */
 export function randomInt(min, max) {
-	return Math.floor( random(min, max + 1) );
+	return FLOOR( random(min, max + 1) );
 }

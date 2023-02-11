@@ -1,3 +1,5 @@
+const FLOOR = Math.floor;
+
 function catmullrom(p0, p1, p2, p3, t) {
 	const v0 = (p2 - p0) * 0.5,
 		v1 = (p3 - p1) * 0.5,
@@ -7,12 +9,12 @@ function catmullrom(p0, p1, p2, p3, t) {
 }
 
 export function CatmullRom(v, k) {
-	let i = Math.floor(f);
+	let i = FLOOR(f);
 	const m = v.length - 1,
 		f = m * k;
 	if (v[0] === v[m]) {
 		if (k < 0) {
-			i = Math.floor(f = m * (1 + k));
+			i = FLOOR(f = m * (1 + k));
 		}
 		return catmullrom(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
 	} else {
