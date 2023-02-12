@@ -178,7 +178,7 @@ export default {
     created() {
         // watch method of component doesn't seems to work with injected data
         watch(this.$items.getRef(), (newValue, oldValue) => {
-            oldValue.forEach(item => this.stats[item.stat] = this.baseStats[item.stat] || 0)
+            oldValue.forEach(item => this.stats[item.stat] = this.baseStats[item.stat] || 0);
             this.applyItems();
         });
     }

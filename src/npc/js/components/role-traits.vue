@@ -1,35 +1,25 @@
 <template>
     <ul>
         <li>{{ $t('personality') }}: {{ personality.map($t).join(', ') }}</li>
-        <li>{{ $t('motivation') }}: {{ motivation }} </li>
-        <!-- https://en.wikipedia.org/wiki/Alignment_(Dungeons_%26_Dragons) -->
-        <li>{{ $t('alignment') }}</li>
+        <li>{{ $t('motivation') }}: {{ motivation.map($t).join(' ') }} </li>
+        <li>
+            {{ $t('alignment') }}: {{  $t(moral) }} / {{  $t(ethical) }}
+            <a href="https://en.wikipedia.org/wiki/Alignment_(Dungeons_%26_Dragons)#Alignments" target="_blank" title="Explanation">[ℹ]</a>
+        </li>
+    </ul>
+    {{ $t('demeanor') }}
+    <ul>
+        <!-- Based on a lecture by Chris Crawford -->
+        <li>{{ $t('goodness') }}: {{ goodness }}%</li>
+        <li>{{ $t('honesty') }}: {{ honesty }}%</li>
+        <li>{{ $t('dominant') }}: {{ dominant }}%</li>
     </ul>
 </template>
 
 <script>
-/*
-https://tvtropes.org/pmwiki/pmwiki.php/Main/MotivationIndex
-https://www.ashami.com/rpg/
-https://docs.google.com/document/d/1IzXECpMmCBYQ00fAiBzlxDpJZCVyF_YkqLQ01__PEyw/edit?usp=sharing
-https://springhole.net/writing_roleplaying_randomators/character-motivation.htm
+// https://www.ashami.com/rpg/
 
-Acceptance - the need to be appreciated
-Curiosity - the need to gain knowledge
-Family - the need to take care of one’s offspring
-Honor - the need to be faithful to the customary values of an individual’s ethnic group, family or clan
-Idealism - the need for social justice
-Independence - the need to be distinct and self-reliant
-Order - the need for prepared, established, and conventional environments
-Power - the need for control of will
-Romance - the need for mating or sex
-Saving - the need to accumulate something
-Social contact - the need for relationship with others
-Social status - the need for social significance
-Tranquility - the need to be secure and protected
-Vengeance - the need to strike back 
-*/
-import { randomInt, sample } from '@utils/random.js';
+import { random, randomInt, sample } from '@utils/random.js';
 import { fillRange } from '@utils/array.js';
 
 export default {
@@ -38,7 +28,12 @@ export default {
     data() {
         return {
             personality: [],
-            motivation: ''
+            motivation: [],
+            moral: '',
+            ethical: '',
+            goodness: 0,
+            honesty: 0,
+            dominant: 0
         };
     },
 
@@ -46,6 +41,8 @@ export default {
         generate() {
             this.genPersonality();
             this.genMotivation();
+            this.genAlignment();
+            this.genDemeanor();
         },
 
         genPersonality() {
@@ -63,8 +60,7 @@ export default {
         },
 
         genMotivation() {
-            const motiv = this.parse(sample(this.data.motivation.primary));
-            this.motivation = motiv.map(v => this.$i18n.t(v)).join(' ');
+            this.motivation = this.parse(sample(this.data.motivation.primary));
         },
 
         parse(str) {
@@ -84,6 +80,17 @@ export default {
             }
             parts.push(str.trim());
             return parts.filter(String);
+        },
+
+        genAlignment() {
+            this.moral = sample(this.data.alignment.moral);
+            this.ethical = sample(this.data.alignment.ethical);
+        },
+
+        genDemeanor() {
+            this.goodness = randomInt(100);
+            this.honesty = randomInt(100);
+            this.dominant = randomInt(100);
         }
     }
 };
