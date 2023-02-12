@@ -30,6 +30,7 @@
     "@rollup/plugin-alias": "^4.0.3",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-replace": "^5.0.2",
+    "@rollup/plugin-terser": "^0.4.0",
     "@vue/compiler-sfc": "^3.2.47",
     "http-server": "^14.1.1",
     "rollup-plugin-vue": "^6.0.0"

@@ -2,6 +2,7 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import alias from '@rollup/plugin-alias';
 import replace from '@rollup/plugin-replace';
 import vue from 'rollup-plugin-vue';
+import terser from '@rollup/plugin-terser';
 
 export default {
 	input: 'src/npc/js/main.js',
@@ -28,6 +29,8 @@ export default {
 			]
 		}),
 		// Used to resolve node_modules
-		nodeResolve()
+		nodeResolve(),
+		// Minification
+		terser()
 	]
 };
