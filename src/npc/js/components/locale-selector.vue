@@ -1,7 +1,7 @@
 <template>
     <div class="right">
         <select v-model="$i18n.locale">
-            <option v-for="loc in $i18n.availableLocales" :value="loc">{{ $i18n.messages[loc]._name_ }}</option>
+            <option v-for="loc in $i18n.availableLocales" :value="loc">{{ $t(loc) }}</option>
         </select>
     </div>
 </template>
@@ -13,9 +13,9 @@ const locales = {};
 
 export default {
     setup() {
-        // get locale reactive object from global instance and assing it as a property
-        const { locale } = useI18n({ useScope: 'global' });
-        return { locale };
+        // get some reactive objects from the global i18n instance and assing it as a property
+        const { locale, setLocaleMessage } = useI18n({ useScope: 'global' });
+        return { locale, setLocaleMessage };
     },
 
     watch: {
@@ -33,7 +33,7 @@ export default {
             if (!locales[newLocale]) {
                 const data = await fetch(`data/locales/${newLocale}.json`);
                 const res = await data.json();
-                this.$i18n.setLocaleMessage(newLocale, res);
+                this.setLocaleMessage(newLocale, res);
                 locales[newLocale] = true;
             }
         }

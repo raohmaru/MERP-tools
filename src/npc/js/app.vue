@@ -87,8 +87,8 @@
             <RoleTraits ref="roletraits" amount="3" :data="data.traits"/>
         </section>
     
-        <section>
-            <!-- https://springhole.net/writing_roleplaying_randomators/basic-character-appearance.htm -->
+        <!-- https://springhole.net/writing_roleplaying_randomators/basic-character-appearance.htm -->
+        <!-- <section>
             {{ $t('phys_appearance') }}
             <ul>
                 <li>{{ $t('skin') }}</li>
@@ -98,7 +98,7 @@
                 <li>{{ $t('weight') }}</li>
                 <li>{{ $t('build') }}</li>
             </ul>
-        </section>
+        </section> -->
     </article>
 </template>
 

@@ -4,15 +4,14 @@ import App from './app.vue'
 import Items from './plugins/items.js'
 
 const i18n = new createI18n({
+    legacy: false,
     locale: 'en',
     fallbackLocale: 'en',
+    missingWarn: false,
+    fallbackWarn: false,
     messages: {
-        en: {
-            _name_: 'English'
-        },
-        es: {
-            _name_: 'Español'
-        }
+        en: {},
+        es: {}
     }
 });
 

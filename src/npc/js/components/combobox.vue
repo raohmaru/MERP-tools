@@ -86,7 +86,7 @@ export default {
         },
 
         t(id) {
-            return this.$i18n.t(this.localeGroup + id);
+            return this.$t(this.localeGroup + id);
         }
     }
 };

@@ -1,6 +1,6 @@
 import alias from '@rollup/plugin-alias';
-const replace = require('@rollup/plugin-replace');
-const vue = require('rollup-plugin-vue');
+import replace from '@rollup/plugin-replace';
+import vue from 'rollup-plugin-vue';
 
 export default {
 	input: 'src/npc/js/main.js',
@@ -23,7 +23,8 @@ export default {
 		vue(),
 		// Vue’s esm build expects process.env.NODE_ENV to be available / replaced with a string
 		replace({
-			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+			preventAssignment: true
 		}),
 		alias({
 			entries: [

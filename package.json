@@ -2,7 +2,12 @@
   "name": "merp-tools",
   "version": "0.1.0",
   "description": "Tools for MERP games",
+  "type": "module",
   "private": true,
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "build": "rollup -c rollup.config.dev.js",
     "build:dist": "cross-env NODE_ENV=production rollup -c rollup.config.dist.js",
@@ -17,16 +22,16 @@
   "license": "MIT",
   "dependencies": {
     "cross-env": "^7.0.3",
-    "rollup": "^2.34.2",
-    "vue": "^3.0.4",
-    "vue-i18n": "^9.0.0-beta.10"
+    "rollup": "^3.15.0",
+    "vue": "^3.2.47",
+    "vue-i18n": "^9.2.2"
   },
   "devDependencies": {
-    "@rollup/plugin-alias": "^3.1.1",
-    "@rollup/plugin-node-resolve": "^11.0.0",
-    "@rollup/plugin-replace": "^2.3.4",
-    "@vue/compiler-sfc": "^3.0.4",
-    "http-server": "^0.12.3",
+    "@rollup/plugin-alias": "^4.0.3",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-replace": "^5.0.2",
+    "@vue/compiler-sfc": "^3.2.47",
+    "http-server": "^14.1.1",
     "rollup-plugin-vue": "^6.0.0"
   }
 }
