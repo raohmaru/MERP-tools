@@ -1,9 +1,12 @@
 <template>
-    <div class="right">
-        <select v-model="$i18n.locale">
+    <aside class="right">
+        <!-- <select v-model="$i18n.locale">
             <option v-for="loc in $i18n.availableLocales" :value="loc">{{ $t(loc) }}</option>
-        </select>
-    </div>
+        </select> -->
+        <template v-for="loc in $i18n.availableLocales">
+            &nbsp;<a href="javascript:;" @click="locale = loc">{{ $t(loc) }}</a>
+        </template>
+    </aside>
 </template>
 
 <script>

@@ -14,7 +14,7 @@
                 <th><abbr :title="$t('stalkhide_long')">{{ $t('stalkhide') }}</abbr></th>
                 <th><abbr :title="$t('locktrap_long')">{{ $t('locktrap') }}</abbr></th>
                 <th><abbr :title="$t('per_long')">{{ $t('per') }}</abbr></th>
-                <th><abbr :title="$t('runes_long')">{{ $t('runes') }}</abbr>/<abbr :title="$t('use_long')">{{ $t('use') }}</abbr></th>
+                <th><abbr :title="$t('runes_long')">{{ $t('runes_rune') }}</abbr>/<abbr :title="$t('use_long')">{{ $t('use') }}</abbr></th>
                 <th><abbr :title="$t('spells_long')">{{ $t('spells') }}</abbr></th>
                 <th><abbr :title="$t('craft_long')">{{ $t('craft') }}</abbr></th>
             </tr>
@@ -67,7 +67,7 @@ export default {
         };
     },
     props: ['data', 'levelMax', 'variation', 'shield'],
-    inject: ['defs', 'npc'],
+    inject: ['base', 'npc'],
     methods: {
         /**
          * @param {String} name
@@ -75,7 +75,7 @@ export default {
          */
         getStatValue(name, stat) {
             if (stat instanceof Array) {
-                // stat = [min, max, px, py, cap]
+                // stat = [min, max, px, py]
                 const range = stat[1] - stat[0];
                 let v;
                 if (stat.length <= 2) {
@@ -92,7 +92,7 @@ export default {
                     v += range * random(-1, 1) * (this.variation / 100);
                 }
 
-                const raceStats = this.defs.value.races[this.npc.value.race];
+                const raceStats = this.base.value.races[this.npc.value.race];
                 if (raceStats) {
                     const raceStat = raceStats.stats[name];
                     if (raceStat && typeof raceStat === 'number') {
@@ -100,7 +100,7 @@ export default {
                     }
                 }
 
-                const statDef = this.defs.value.stats[name];
+                const statDef = this.base.value.stats[name];
                 if (v < 0 && statDef?.neg === false) {
                     v = statDef.min || 0;
                 }
@@ -132,8 +132,8 @@ export default {
             if (!this.npc.value.race) {
                 return;
             }
-            const raceStats = this.defs.value.races[this.npc.value.race];
-            const profStats = this.defs.value.professions[this.npc.value.prof].stats;
+            const raceStats = this.base.value.races[this.npc.value.race];
+            const profStats = this.base.value.professions[this.npc.value.prof].stats;
             this.$items.getAll().forEach(item => {
                 let v = (this.baseStats[item.stat] || 0) + item.bonus;
                 if (raceStats) {
@@ -159,7 +159,8 @@ export default {
 
         setStat(name, value) {
             this.baseStats[name] = value;
-            delete this.stats[name];  // Force view re-render
+            // Force view re-render
+            delete this.stats[name];
             this.stats[name] = value;
         },
 
@@ -176,7 +177,7 @@ export default {
     },
 
     created() {
-        // watch method of component doesn't seems to work with injected data
+        // Watch method of component doesn't seems to work with injected data
         watch(this.$items.getRef(), (newValue, oldValue) => {
             oldValue.forEach(item => this.stats[item.stat] = this.baseStats[item.stat] || 0);
             this.applyItems();

@@ -1,13 +1,20 @@
 <template>
     <ul>
-        <li>{{ $t('personality') }}: {{ personality.map($t).join(', ') }}</li>
-        <li>{{ $t('motivation') }}: {{ motivation.map($t).join(' ') }} </li>
         <li>
-            {{ $t('alignment') }}: {{  $t(moral) }} / {{  $t(ethical) }}
-            <a href="https://en.wikipedia.org/wiki/Alignment_(Dungeons_%26_Dragons)#Alignments" target="_blank" title="Explanation">[ℹ]</a>
+            {{ $t('personality') }}: {{ personality.map($t).join(', ') }}
+            <span @click="genPersonality">🔃</span>
+        </li>
+        <li>
+            {{ $t('motivation') }}: {{ motivation.map($t).join(' ') }}
+            <span @click="genMotivation">🔃</span>
+        </li>
+        <li>
+            {{ $t('alignment') }} <a href="https://en.wikipedia.org/wiki/Alignment_(Dungeons_%26_Dragons)#Alignments" target="_blank" title="Explanation">[ℹ]</a>:
+                {{  $t(ethical) }} / {{  $t(moral) }}
+            <span @click="genAlignment">🔃</span>
         </li>
     </ul>
-    {{ $t('demeanor') }}
+    {{ $t('demeanor') }} <span @click="genDemeanor">🔃</span>
     <ul>
         <!-- Based on a lecture by Chris Crawford -->
         <li>{{ $t('goodness') }}: {{ goodness }}%</li>
@@ -19,7 +26,7 @@
 <script>
 // https://www.ashami.com/rpg/
 
-import { random, randomInt, sample } from '@utils/random.js';
+import { randomInt, sample } from '@utils/random.js';
 import { fillRange } from '@utils/array.js';
 
 export default {

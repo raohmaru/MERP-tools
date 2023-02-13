@@ -74,7 +74,8 @@
 
     <article>
         <p class="center">
-            <strong>{{ name }}</strong> ({{ $t(npc.race || '') }}<span v-if="npc.gender !== 'not-defined'">, {{ $t(npc.gender || '') }}</span>)
+            <strong>{{ name }}</strong> <span @click="generateName">🔃</span>
+            ({{ $t(npc.race || '') }}<span v-if="npc.gender !== 'not-defined'">, {{ $t(npc.gender || '') }}</span>)
         </p>
         
         <section>
@@ -104,7 +105,7 @@
 
 <script>
 import * as components from './components/index.js';
-import { computed } from 'vue';
+import { computed, nextTick } from 'vue';
 
 export default {
     components,
@@ -131,7 +132,7 @@ export default {
     provide() {
         return {
             // Data available for components and makes them reactive
-            defs: computed(() => this.data.defs),
+            base: computed(() => this.data.base),
             npc: computed(() => this.npc)
         }
     },
@@ -151,6 +152,55 @@ export default {
 
         armor(newValue) {
             this.applyItem('armor', newValue);
+        },
+
+        async gender() {
+            // When mutating reactive state DOM updates are not applied synchronously.
+            // Instead, Vue buffers them until the "next tick".
+            await nextTick();
+            this.npc.gender = this.$refs.gender.getValue();
+        },
+
+        async prof() {
+            await nextTick();
+            const comps = this.$refs;
+            this.npc.prof = comps.prof.getValue();
+            comps.stats.fill();
+        },
+
+        async job() {
+            await nextTick();
+            this.npc.job = this.$refs.job.getValue();
+        },
+
+        async race() {
+            await nextTick();
+            const comps = this.$refs;
+            this.npc.race = comps.race.getValue();
+            comps.stats.fill();
+            this.generateName();
+        },
+
+        async level() {
+            await nextTick();
+            const comps = this.$refs;
+            this.npc.level = comps.level.getValue();
+            comps.stats.fill();
+        },
+
+        async atk1() {
+            await nextTick();
+            this.npc.atk1 = this.$refs.atk1.getValue();
+        },
+
+        async atk2() {
+            await nextTick();
+            this.npc.atk2 = this.$refs.atk2.getValue();
+        },
+
+        async variation() {
+            await nextTick();
+            this.$refs.stats.fill();
         }
     },
 
@@ -159,7 +209,7 @@ export default {
             const data = await fetch('data/npc.json');
             const res = await data.json();
             this.data = Object.assign({}, res);
-            this.$items.setup(this.data.defs.items);
+            this.$items.setup(this.data.base.items);
         },
 
         async generate() {
@@ -174,7 +224,7 @@ export default {
                 level: comps.level.getValue()
             };
             comps.stats.fill();
-            comps.name.generateName(this.npc.race, this.npc.gender);
+            this.generateName();
             comps.roletraits.generate();
             this.applyItem('armor', this.armor);
         },
@@ -188,6 +238,10 @@ export default {
             }
             this.$items.remove(id);
             this.$items.add(id, stats.getStat(id));
+        },
+
+        generateName() {
+            this.$refs.name.generateName(this.npc.race, this.npc.gender);
         }
     }
 };
